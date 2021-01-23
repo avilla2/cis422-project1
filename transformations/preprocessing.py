@@ -13,7 +13,10 @@ ages = pd.Series([22, 35, 58], name="Age")
 Api Reference Here: 
 https://pandas.pydata.org/docs/reference/series.html
 '''
-
+class preprocess(self, ts, function):
+    def __init__(self, ts, function):
+        pass
+        
 
 def denoise(ts: "Series"):
     pass
