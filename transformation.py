@@ -49,6 +49,7 @@ def add_operator(node, op):
 		name = "operator_" + str(index) + "_" + op
 		op_node = Node(name, parent=node, operator=node.operator.copy(), process=node.process, data=node.data)
 		op_node.operator.append(op)
+        return op_node
 	else:
 		print("Insufficient Arguments : node, operator")
 
@@ -65,6 +66,7 @@ def replace_process(node, prc):
 		name = "process_" + str(index) + "_" + prc
 		prc_node = Node(name, parent=node, operator=node.operator, process=node.process.copy(), data=node.data)
 		prc_node.process.append(prc)
+        return prc_node
 	else:
 		print("Insufficient Arguments : node, operator")
         
@@ -82,9 +84,7 @@ def replicate_tree_path(node):
 	Different 
 	Copy and paste the path following the one node : path above
 	'''
-	copy_nodes = None
-	for nd in node.path:
-		copy_nodes.append(copy.deepcopy(nd))
+	copy_nodes = copy.deepcopy(node.path)
 	return copy_nodes
 
 def add_subtree(pnode, node):
