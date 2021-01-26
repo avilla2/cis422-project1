@@ -14,6 +14,82 @@ def read(input):
 
     return df
 
+def denoise(ts):
+    '''
+    Removes noise from a time series. Produces a time series with less noise than
+    the original one. This function can be implemented using moving (or rolling) media or median
+    (included in the Pandas library.)
+    '''
+    pass
+
+def impute_missing_date(ts):
+    '''
+    Missing data are often encoded as blanks, NaNs, or other
+    placeholders. At this point, let us assume that a single point is missing, and it can be computed
+    from its adjacent points in time.
+    '''
+    pass
+
+def impute_outliers(ts):
+    '''
+    – Outliers are disparate data that we can treat as missing data. Use the
+    same procedure as for missing data (sklearn implements outlier detection.) This function is better
+    applied using the higher dimensional data produced by TS2DB (see below.)
+    '''
+    pass
+
+def longest_continuous_run(ts):
+    '''
+    – Isolates the most extended portion of the time series without
+    missing data. It returns a time series.
+    '''
+    pass
+
+def clip(ts, starting_date, final_date):
+    '''
+    clips the time series to the specified period’s data.
+    '''
+    pass
+
+def assign_time(ts, start, increment):
+    '''
+    In many cases, we do not have the times associated
+    with a sequence of readings. Start and increment represent t0 delta, respectively.
+    '''
+    pass
+
+def difference(ts):
+    '''
+    Produces a time series whose magnitudes are the differences between
+    consecutive elements in the original time series.
+    '''
+    pass
+
+def scaling(ts):
+    '''
+    Produces a time series whose magnitudes are scaled so that the resulting
+    magnitudes range in the interval [0,1].
+    '''
+    pass
+
+def standardize(ts):
+    '''
+    Produces a time series whose mean is 0 and variance is 1.
+    '''
+    pass
+
+def logarithm(ts):
+    '''
+    Produces a time series whose elements are the logarithm of the original
+    elements.
+    '''
+    pass
+
+def cubic_root(ts):
+    '''
+    Produces a time series whose elements are the original elements’ cubic root
+    '''
+    pass
 
 """
 right now this function only splits the dataframe into a training dataframe
@@ -33,6 +109,10 @@ def split_data(df, perc_training=.25, perc_valid=0, perc_test=.75):
     #print(test_df.head)
 
     return train_df, test_df
+
+def design_matrix(ts, input_index, output_index):
+    pass
+
 
 """
 design matrix
@@ -86,5 +166,12 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
 
     return output_matrix, input_matrix
 
+def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
+                output_index, output_file_name):
+    '''
+    this function combines reading a file, splitting the
+    data, converting to database, and producing the training databases.
+    '''
+    pass
 
 
