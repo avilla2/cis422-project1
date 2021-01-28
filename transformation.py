@@ -10,28 +10,31 @@ using this library will save us a lot of time
 '''
 
 class tf_tree(object): 
-'''
-This is TransFormation tree
-NodeMixin is a feature in anytree library
-NodeMixin will add node feature to our functions
-''' 
+	'''
+	This is TransFormation tree
+	NodeMixin is a feature in anytree library
+	NodeMixin will add node feature to our functions
+	''' 
 	def __init__(self):
 		self.root = None
-		self.leaves = []
-		self.current_pip = []
+		self.current_node = None
+		self.leaves = None
+		self.pipeline = None
 
 	def print_tree(self, node):
-	    '''
-	    using anytree function RenderTree, display tree with node as root
-	    '''
-    	print(RenderTree(node))
+		'''
+		using anytree function RenderTree, display tree with node as root
+		'''
+		print(RenderTree(node))
 
 	def create_tree(self, title, ts): 
 		'''
 		Create a new tree : initialize tree
 		'''
 		#Node will make node automatically from anytree
-		self.root = Node(title, operator=[], process=[], data=ts)#preprocesesing.read(ts))
+		self.root = Node(title, data=ts)#preprocesesing.read(ts))
+		self.current_node = self.root
+		return self.current_node
 		
 	def add_operator(self, node, op): 
 		'''
@@ -51,11 +54,9 @@ NodeMixin will add node feature to our functions
 			if op and node.data:
 	            #index is for the numbering purpose
 	            #anytree doesn't allow nodes with same name
-				index = len(node.operator) + 1
-				name = "operator_" + str(index) + "_" + op
-				op_node = Node(name, parent=node, operator=node.operator.copy(), process=node.process, data=node.data)
-				op_node.operator.append(op)
-		        return op_node
+				name = "operator_" + op
+				self.current_node = Node(name, parent=node, operator=op, data=node.data.copy()) 
+				return True
 			else:
 				print("Insufficient Arguments : node, operator")
 		else:
@@ -71,11 +72,9 @@ NodeMixin will add node feature to our functions
 		'''
 		if self.root:
 			if prc and node.data:
-				index = len(node.process) + 1
-				name = "process_" + str(index) + "_" + prc
-				prc_node = Node(name, parent=node, operator=node.operator, process=node.process.copy(), data=node.data)
-				prc_node.process.append(prc)
-		        return prc_node
+				name = "process_" + prc
+				self.current_node = Node(name, parent=node, process=prc, data=node.data.copy())
+				return True
 			else:
 				print("Insufficient Arguments : node, operator")
 		else:
@@ -89,6 +88,7 @@ NodeMixin will add node feature to our functions
 		'''
 		copy_name = node.name + "_copy"
 		copy_node = copy.deepcopy(node)
+		copy_node.parent = None
 		copy_node.name = copy_name
 		return copy_node
 
@@ -99,8 +99,11 @@ NodeMixin will add node feature to our functions
 		using deepcopy mathod, copy data but separate from original
 		and return the copied path
 		'''
-		copy_nodes = copy.deepcopy(node.path)
-		return copy_nodes
+		if node:
+			copy_nodes = copy.deepcopy(node.path)
+			return copy_nodes
+		else:
+			print("node is empty!")
 
 	def add_subtree(self, pnode, node):
 		'''
@@ -119,7 +122,7 @@ NodeMixin will add node feature to our functions
 		but im not sure, if this is right way to do
 		'''
 		self.leaves = self.root.leaves
-		return self.leaves
+		return True
 
 	def get_ready_pipeline(self, node):
 		'''
@@ -128,10 +131,9 @@ NodeMixin will add node feature to our functions
 		If user node is a leaf, we can run single pip using path of leaf
 		but im not sure, if this is right way to do
 		'''
-		for leaf in self.leaves:
-			if leaf.name == node.name:
-				self.current_pip = replicate_tree_path(node)
-		return self.current_pip
+		if node.name in self.leaves.name:
+			self.pipline = replicate_tree_path(node)
+		return self.pipline
 
 	def exec_tree(self): 
 		'''
@@ -161,3 +163,6 @@ NodeMixin will add node feature to our functions
 			for node in self.current_pip:
 				#have to execute each node now
 				return True
+
+
+
