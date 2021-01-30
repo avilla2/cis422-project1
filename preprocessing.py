@@ -6,29 +6,37 @@ parameters
 returns
     returns Dataframe of the csv file data
 """
+
+
 def read(input):
-    #df = pd.read_csv(input, parse_dates=True, infer_datetime_format=True)  # use if there's only one date/time column
-    df = pd.read_csv(input, parse_dates={'Datetime':[0, 1]}, infer_datetime_format=True)  #merges time and date columns
-
-    #print(df.head)
-
+    # df = pd.read_csv(input, parse_dates=True, infer_datetime_format=True)  # use if there's only one date/time column
+    try:
+        df = pd.read_csv(input, parse_dates={'Datetime': [0, 1]},
+                     infer_datetime_format=True)  # merges time and date columns
+    except:
+        df = pd.read_csv(input, names=["Time Series"])
+    # print(df.head)
     return df
 
-def denoise(ts):
-    '''
+
+def denoise(ts: pd.DataFrame) -> None:
+    """
     Removes noise from a time series. Produces a time series with less noise than
     the original one. This function can be implemented using moving (or rolling) media or median
     (included in the Pandas library.)
-    '''
-    pass
+    """
+    # Implementing 5 point moving average
+    ts["Denoised"] = ts.rolling(window=5).mean()
+
 
 def impute_missing_date(ts):
-    '''
+    """
     Missing data are often encoded as blanks, NaNs, or other
     placeholders. At this point, let us assume that a single point is missing, and it can be computed
     from its adjacent points in time.
-    '''
+    """
     pass
+
 
 def impute_outliers(ts):
     '''
@@ -38,6 +46,7 @@ def impute_outliers(ts):
     '''
     pass
 
+
 def longest_continuous_run(ts):
     '''
     – Isolates the most extended portion of the time series without
@@ -45,11 +54,13 @@ def longest_continuous_run(ts):
     '''
     pass
 
+
 def clip(ts, starting_date, final_date):
     '''
     clips the time series to the specified period’s data.
     '''
     pass
+
 
 def assign_time(ts, start, increment):
     '''
@@ -58,12 +69,14 @@ def assign_time(ts, start, increment):
     '''
     pass
 
+
 def difference(ts):
     '''
     Produces a time series whose magnitudes are the differences between
     consecutive elements in the original time series.
     '''
     pass
+
 
 def scaling(ts):
     '''
@@ -72,11 +85,13 @@ def scaling(ts):
     '''
     pass
 
+
 def standardize(ts):
     '''
     Produces a time series whose mean is 0 and variance is 1.
     '''
     pass
+
 
 def logarithm(ts):
     '''
@@ -85,30 +100,35 @@ def logarithm(ts):
     '''
     pass
 
+
 def cubic_root(ts):
     '''
     Produces a time series whose elements are the original elements’ cubic root
     '''
     pass
 
+
 """
 right now this function only splits the dataframe into a training dataframe
 and a test dataframe. Not sure what the validation dataframe would be for.
 """
+
+
 def split_data(df, perc_training=.25, perc_valid=0, perc_test=.75):
-    #already in sklearn?
-    #TODO check if percents add to 1
+    # already in sklearn?
+    # TODO check if percents add to 1
 
     x, y = df.shape
     t = round(x * perc_training)
 
-    train_df = df.iloc[:t,:]
-    test_df = df.iloc[t:,:]
+    train_df = df.iloc[:t, :]
+    test_df = df.iloc[t:, :]
 
-    #print(training_df.tail)
-    #print(test_df.head)
+    # print(training_df.tail)
+    # print(test_df.head)
 
     return train_df, test_df
+
 
 def design_matrix(ts, input_index, output_index):
     pass
@@ -130,6 +150,8 @@ parameters
 returns
     two matrices
 """
+
+
 def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     x, y = df.shape
 
@@ -143,9 +165,9 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     for i in range(mo):
         output_array.append(i * to + tail)
 
-    #print(input_array, output_array)
-    #print(df.iloc[input_array])
-    #print(df.iloc[output_array])
+    # print(input_array, output_array)
+    # print(df.iloc[input_array])
+    # print(df.iloc[output_array])
 
     input_matrix = []
     output_matrix = []
@@ -161,17 +183,16 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
         input_array = [x + 1 for x in input_array]
         output_array = [x + 1 for x in output_array]
 
-    #print(input_matrix)
-    #print(output_matrix)
+    # print(input_matrix)
+    # print(output_matrix)
 
     return output_matrix, input_matrix
 
+
 def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
-                output_index, output_file_name):
+           output_index, output_file_name):
     '''
     this function combines reading a file, splitting the
     data, converting to database, and producing the training databases.
     '''
     pass
-
-
