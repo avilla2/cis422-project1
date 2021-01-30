@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 def plot(ts):
@@ -8,12 +9,9 @@ def plot(ts):
     :return: No return(?)
     Displays data according to their time indices
     """
-    #figure out a way to read ts data
-    #dplot = pd.read_csv(ts.data)
-    plt.xlabel('X Label')
-    plt.ylabel('Y Label')
-    #plt.plot(dplot)
-
+    new_df = ts.set_index('Datetime')
+    new_df.plot()
+    plt.show()
 
 def histogram(ts):
     """
@@ -46,7 +44,7 @@ def normality_test(ts):
     time series data distribution
     matplotlib qqplot
     """
-    pass
+    raise(NotImplementedError)
 
 def mse(y_test, y_forecast):
     """
@@ -55,7 +53,7 @@ def mse(y_test, y_forecast):
     :return: Error
     Computes the MSE error of two TS
     """
-    pass
+    raise(NotImplementedError)
 
 def mape(y_test, y_forecast):
     """
@@ -74,40 +72,5 @@ def smape(y_test, y_forecast):
     :return: error
     Computes the SMAPE error of two time series
     """
-    pass
-
-
-=======
-from matplotlib import pyplot as plt
-
-
-def plot(ts):
-    new_df = ts.set_index('Datetime')
-    new_df.plot()
-    plt.show()
-
-
-def histogram(ts):
-    raise NotImplementedError
-
-
-def box_plot(ts):
-    raise NotImplementedError
-
-
-def normality_test(ts):
-    raise NotImplementedError
-
-
-def mse(y_test, t_forecast):
-    raise NotImplementedError
-
-
-def mape(y_test, t_forecast):
-    raise NotImplementedError
-
-
-def smape(y_test, t_forecast):
-    raise NotImplementedError
->>>>>>> 02980b64c9b1fdcee461d4b25639ced48808b233
+    raise(NotImplementedError)
 
