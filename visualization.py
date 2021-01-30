@@ -23,7 +23,9 @@ def histogram(ts):
     Plots histogram vertically and side to side
     with a plot of the TS
     """
-    pass
+    new_df = ts.set_index("DateTime")
+    new_df.hist()
+    plt.show()
 
 def box_plot(ts):
     """
@@ -32,7 +34,9 @@ def box_plot(ts):
     Produces a Box and Whiskers plot of TS
     Prints 5-number summary of the data
     """
-    pass
+    new_df = ts.set_index("DateTime")
+    new_df.boxplot()
+    plt.show()
 
 def normality_test(ts):
     """
@@ -60,7 +64,8 @@ def mape(y_test, y_forecast):
     :return: Error
     Computes the MAPE error of two time series
     """
-    pass
+    y_test, y_forecast = np.array(y_test), np.array(y_forecast)
+    return np.mean(np.abs((y_test - y_forecast) / y_test)) * 100
 
 def smape(y_test, y_forecast):
     """
