@@ -11,12 +11,14 @@ returns
 
 def read(input):
     # df = pd.read_csv(input, parse_dates=True, infer_datetime_format=True)  # use if there's only one date/time column
-    try:
-        df = pd.read_csv(input, parse_dates={'Datetime': [0, 1]},
-                         infer_datetime_format=True)  # merges time and date columns
-    except:
-        df = pd.read_csv(input, names=["Data"])
-    # print(df.head)
+    df = pd.read_csv(input, nrows=1)
+    x, y = df.shape
+    if y == 3:
+        df = pd.read_csv(input, parse_dates={'Datetime': [0, 1]}, infer_datetime_format=True)
+    elif y == 2:
+        df = pd.read_csv(input, parse_dates={'Datetime': [0]}, infer_datetime_format=True)
+    else:
+        df = pd.read_csv(input)
     return df
 
 
@@ -30,7 +32,7 @@ def denoise(ts: pd.DataFrame) -> None:
     ts["Data"] = ts.rolling(window=5).mean()
 
 
-def impute_missing_date(ts):
+def impute_missing_data(ts):
     """
     Missing data are often encoded as blanks, NaNs, or other
     placeholders. At this point, let us assume that a single point is missing, and it can be computed
@@ -101,6 +103,7 @@ def logarithm(ts):
     """
     ts["Data"] = ts["Data"].apply(lambda x: math.log(x, 10))
 
+
 def cubic_root(ts):
     '''
     Produces a time series whose elements are the original elements’ cubic root
@@ -108,26 +111,24 @@ def cubic_root(ts):
     ts["Data"] = ts["Data"].apply(lambda x: x**(1/3))
 
 
-"""
-right now this function only splits the dataframe into a training dataframe
-and a test dataframe. Not sure what the validation dataframe would be for.
-"""
-
-
-def split_data(df, perc_training=.25, perc_valid=0, perc_test=.75):
-    # already in sklearn?
-    # TODO check if percents add to 1
+# Splits the data based on the percents (in decimal notation).
+# Percents must add to 1.0 and training and test percents cannot be 0.0.
+def split_data(df, perc_training=.4, perc_valid=.3, perc_test=.3):
+    total = perc_training + perc_valid + perc_test
+    if total != 1:
+        raise Exception("Error. Split data percents must add up to 1.0")
+    if perc_training == 0 or perc_test == 0:
+        raise Exception("Error. Training and Test percents must not be 0.0")
 
     x, y = df.shape
-    t = round(x * perc_training)
+    t1 = round(x * perc_training)
+    t2 = round(x * perc_valid) + t1
 
-    train_df = df.iloc[:t, :]
-    test_df = df.iloc[t:, :]
+    train_df = df.iloc[:t1,:]
+    valid_df = df.iloc[t1:t2,:]
+    test_df = df.iloc[t2:,:]
 
-    # print(training_df.tail)
-    # print(test_df.head)
-
-    return train_df, test_df
+    return train_df, valid_df, test_df
 
 
 def design_matrix(ts, input_index, output_index):
