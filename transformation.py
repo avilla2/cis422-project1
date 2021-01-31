@@ -1,7 +1,7 @@
 
 import preprocessing
 import modeling
-import visualization
+#import visualization
 import pandas as pd
 import copy
 from anytree import Node, RenderTree, search
@@ -155,11 +155,11 @@ class tf_tree(object):
 
 	def exec_operator(self, operator, ts):
 		operation = {
-			'denoise': preprocessing.denoise(ts)
-			'impute_missing_date': preprocessing.impute_missing_date(ts)
-			'impute_outliers': preprocessing.impute_outliers(ts)
-			'logarithm': preprocessing.logarithm(ts)
-			'plot': preprocessing.impute_outliers(ts)
+			'denoise': preprocessing.denoise(ts),
+			'impute_missing_date': preprocessing.impute_missing_date(ts),
+			'impute_outliers': preprocessing.impute_outliers(ts),
+			'logarithm': preprocessing.logarithm(ts),
+			'plot': preprocessing.impute_outliers(ts),
 		}
 		return operation.get(operator, 'Invalid Index'.format(operator))
 		pass
@@ -177,8 +177,11 @@ class tf_tree(object):
 			transformer = self.root.data.copy()
 			for leaf in self.leaves:
 				for pth in leaf.path:
-					if pth.operator:
-						self.exec_operator(pth.operator, transformer)
+					if pth != self.root:
+						if pth.operator == "logarithm":
+							print(pth.operator, " is operator \n")
+							print(transformer, " is data \n")
+							self.exec_operator(pth.operator,transformer)
 			return transformer
 		else:
 			return False
@@ -194,8 +197,11 @@ class tf_tree(object):
 		if self.pipeline:
 			transformer = self.root.data.copy()
 			for pl in self.pipeline:
-				if pl.operator:
-					self.exec_operator(pl.operator, transformer)
+				if pth != self.root:
+					if pl.operator:
+							print(pl.operator, " is operator \n")
+							print(transformer, " is data \n")
+							self.exec_operator(pl.operator, transformer)
 			return transformer
 		else:
 			return False
