@@ -176,12 +176,12 @@ class tf_tree(object):
 		if self.leaves:
 			transformer = self.root.data.copy()
 			for leaf in self.leaves:
-				for pth in leaf.path:
-					if pth != self.root:
-						if pth.operator == "logarithm":
-							print(pth.operator, " is operator \n")
+				for pl in leaf.path:
+					if pl != self.root:
+						if pl.operator:
+							print(pl.operator, " is operator \n")
 							print(transformer, " is data \n")
-							self.exec_operator(pth.operator,transformer)
+							self.exec_operator(pl.operator,transformer)
 			return transformer
 		else:
 			return False
@@ -197,11 +197,11 @@ class tf_tree(object):
 		if self.pipeline:
 			transformer = self.root.data.copy()
 			for pl in self.pipeline:
-				if pth != self.root:
+				if pl != self.root:
 					if pl.operator:
-							print(pl.operator, " is operator \n")
-							print(transformer, " is data \n")
-							self.exec_operator(pl.operator, transformer)
+						print(pl.operator, " is operator \n")
+						print(transformer, " is data \n")
+						self.exec_operator(pl.operator, transformer)
 			return transformer
 		else:
 			return False
