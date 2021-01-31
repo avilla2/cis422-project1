@@ -1,14 +1,15 @@
 
-#import preprocessing
-#import modeling
-
+import preprocessing
+import modeling
+import visualization
+import pandas as pd
 import copy
-from anytree import Node, RenderTree
+from anytree import Node, RenderTree, search
 '''
 anytree is a great tree library. I believe 
 using this library will save us a lot of time
 '''
-
+##/Users/hyojaeshin/Desktop/CIS422/Project1/Time Series Data/1_temperature_test.csv
 class tf_tree(object): 
 	'''
 	This is TransFormation tree
@@ -20,6 +21,8 @@ class tf_tree(object):
 		self.current_node = None
 		self.leaves = None
 		self.pipeline = None
+		self.node_count = 0
+		self.copy = False
 
 	def print_tree(self, node):
 		'''
@@ -27,14 +30,19 @@ class tf_tree(object):
 		'''
 		print(RenderTree(node))
 
-	def create_tree(self, title, ts): 
+	def create_tree(self, ts): 
 		'''
 		Create a new tree : initialize tree
 		'''
 		#Node will make node automatically from anytree
-		self.root = Node(title, data=ts)#preprocesesing.read(ts))
-		self.current_node = self.root
-		return self.current_node
+		if ts:
+			self.node_count += 1
+			df = pd.read_csv(ts)
+			self.root = Node(self.node_count, data=df)#preprocessing.read(ts))
+			self.current_node = self.root
+			return True
+		else:
+			return False
 		
 	def add_operator(self, node, op): 
 		'''
@@ -44,39 +52,30 @@ class tf_tree(object):
 		
 		We need to get function from user which will be choices
 		Easist way to handle cornercases
-
-		We have to make sure that we only providing this function
-		when user create_tree first (user must provide ts)
-
-		pnode is for parent node
 		'''
 		if self.root:
-			if op and node.data:
+			nd = search.find_by_attr(self.root, node)
+			if nd and op:
 	            #index is for the numbering purpose
 	            #anytree doesn't allow nodes with same name
-				name = "operator_" + op
-				self.current_node = Node(name, parent=node, operator=op, data=node.data.copy()) 
+				self.node_count += 1
+				add_node = Node(self.node_count, parent=nd, operator=op)
+				self.current_node = add_node 
 				return True
-			else:
-				print("Insufficient Arguments : node, operator")
 		else:
 			return False
 
 
-	def replace_process(self, node, prc): 
+	def replace_process(self, node, op): 
 		'''
-	    This function is to fix node to new operator
-		Replace a process step with a different operator. 
-		-difference(ts)   -scaling(ts)   -standardize(ts)   -logarithm(ts)   -cubic_root(ts)
-		from preprocesesing or it has to be on add_operator
+	    This function is to fix node's operator to new one
+		from preprocesesing
 		'''
 		if self.root:
-			if prc and node.data:
-				name = "process_" + prc
-				self.current_node = Node(name, parent=node, process=prc, data=node.data.copy())
+			nd = search.find_by_attr(self.root, node)
+			if op and nd:
+				nd.operator = op
 				return True
-			else:
-				print("Insufficient Arguments : node, operator")
 		else:
 			return False
 	        
@@ -86,11 +85,19 @@ class tf_tree(object):
 		using deepcopy mathod, copy data but separate from original
 		and return the copied subtree
 		'''
-		copy_name = node.name + "_copy"
-		copy_node = copy.deepcopy(node)
-		copy_node.parent = None
-		copy_node.name = copy_name
-		return copy_node
+		if node:
+			nd = search.find_by_attr(self.root, node)
+			copy_node = copy.deepcopy(nd)
+			self.node_count += 1
+			copy_node.name = self.node_count
+			for descendant in copy_node.descendants:
+				self.node_count += 1
+				descendant.name = self.node_count
+			copy_node.parent = None
+			return copy_node
+		else:
+			return False
+
 
 	def replicate_tree_path(self, node):
 		'''
@@ -100,19 +107,29 @@ class tf_tree(object):
 		and return the copied path
 		'''
 		if node:
-			copy_nodes = copy.deepcopy(node.path)
+			nd = search.find_by_attr(self.root, node)
+			copy_nodes = copy.deepcopy(nd.path)
+			for cp in copy_nodes:
+				#because it is path, [0] is always root
+				self.node_count += 1
+				cp.name = self.node_count
+			copy_nodes[0].parent = None
 			return copy_nodes
 		else:
-			print("node is empty!")
+			return False
 
-	def add_subtree(self, pnode, node):
+	def add_subtree(self, node, to_node):
 		'''
 		Add a subtree to a node. 
 		Add path to input node children list
 		Make this node a sibling of current node
 		'''
-		if pnode and node:
-			node.parent = pnode
+		if node and to_node:
+			tnd = search.find_by_attr(self.root, to_node)
+			node.parent = tnd
+			return True
+		else:
+			return False
 
 	def get_ready_tree(self): 
 		'''
@@ -122,18 +139,30 @@ class tf_tree(object):
 		but im not sure, if this is right way to do
 		'''
 		self.leaves = self.root.leaves
-		return True
+		return self.leaves
 
 	def get_ready_pipeline(self, node):
 		'''
 		Load/Save a pipeline 
-
-		If user node is a leaf, we can run single pip using path of leaf
-		but im not sure, if this is right way to do
 		'''
-		if node.name in self.leaves.name:
-			self.pipline = replicate_tree_path(node)
-		return self.pipline
+		if node:
+			nd = search.find_by_attr(self.root, node)
+			if nd in self.leaves:
+				self.pipeline = copy.deepcopy(nd.path)
+				return self.pipeline
+		else:
+			return False
+
+	def exec_operator(self, operator, ts):
+		operation = {
+			'denoise': preprocessing.denoise(ts)
+			'impute_missing_date': preprocessing.impute_missing_date(ts)
+			'impute_outliers': preprocessing.impute_outliers(ts)
+			'logarithm': preprocessing.logarithm(ts)
+			'plot': preprocessing.impute_outliers(ts)
+		}
+		return operation.get(operator, 'Invalid Index'.format(operator))
+		pass
 
 	def exec_tree(self): 
 		'''
@@ -145,11 +174,14 @@ class tf_tree(object):
 		then result present
 		'''
 		if self.leaves:
+			transformer = self.root.data.copy()
 			for leaf in self.leaves:
-				leaf_path = replicate_tree_path(leaf)
-				for path in leaf_path:
-					#have to execute each node now
-					return True
+				for pth in leaf.path:
+					if pth.operator:
+						self.exec_operator(pth.operator, transformer)
+			return transformer
+		else:
+			return False
 
 	def exec_pipeline(self): 
 		'''
@@ -159,10 +191,11 @@ class tf_tree(object):
 		Contains modeling and forecasting functions
 		return all the results
 		'''
-		if self.current_pip:
-			for node in self.current_pip:
-				#have to execute each node now
-				return True
-
-
-
+		if self.pipeline:
+			transformer = self.root.data.copy()
+			for pl in self.pipeline:
+				if pl.operator:
+					self.exec_operator(pl.operator, transformer)
+			return transformer
+		else:
+			return False
