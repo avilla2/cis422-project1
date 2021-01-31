@@ -13,9 +13,9 @@ def read(input):
     # df = pd.read_csv(input, parse_dates=True, infer_datetime_format=True)  # use if there's only one date/time column
     try:
         df = pd.read_csv(input, parse_dates={'Datetime': [0, 1]},
-                         infer_datetime_format=True, names=["Time Series"])  # merges time and date columns
+                         infer_datetime_format=True)  # merges time and date columns
     except:
-        df = pd.read_csv(input, names=["Time Series"])
+        df = pd.read_csv(input, names=["Data"])
     # print(df.head)
     return df
 
@@ -27,7 +27,7 @@ def denoise(ts: pd.DataFrame) -> None:
     (included in the Pandas library.)
     """
     # Implementing 5 point moving average
-    ts["Time Series"] = ts.rolling(window=5).mean()
+    ts["Data"] = ts.rolling(window=5).mean()
 
 
 def impute_missing_date(ts):
@@ -99,13 +99,13 @@ def logarithm(ts):
     Produces a time series whose elements are the logarithm of the original
     elements.
     """
-    ts["Time Series"] = ts["Time Series"].apply(lambda x: math.log(x, 10))
+    ts["Data"] = ts["Data"].apply(lambda x: math.log(x, 10))
 
 def cubic_root(ts):
     '''
     Produces a time series whose elements are the original elements’ cubic root
     '''
-    pass
+    ts["Data"] = ts["Data"].apply(lambda x: x**(1/3))
 
 
 """
