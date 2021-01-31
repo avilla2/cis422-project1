@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 def plot(ts):
@@ -8,12 +9,9 @@ def plot(ts):
     :return: No return(?)
     Displays data according to their time indices
     """
-    #figure out a way to read ts data
-    #dplot = pd.read_csv(ts.data)
-    plt.xlabel('X Label')
-    plt.ylabel('Y Label')
-    #plt.plot(dplot)
-
+    new_df = ts.set_index('Datetime')
+    new_df.plot()
+    plt.show()
 
 def histogram(ts):
     """
@@ -23,7 +21,9 @@ def histogram(ts):
     Plots histogram vertically and side to side
     with a plot of the TS
     """
-    pass
+    new_df = ts.set_index("DateTime")
+    new_df.hist()
+    plt.show()
 
 def box_plot(ts):
     """
@@ -32,7 +32,9 @@ def box_plot(ts):
     Produces a Box and Whiskers plot of TS
     Prints 5-number summary of the data
     """
-    pass
+    new_df = ts.set_index("DateTime")
+    new_df.boxplot()
+    plt.show()
 
 def normality_test(ts):
     """
@@ -42,7 +44,7 @@ def normality_test(ts):
     time series data distribution
     matplotlib qqplot
     """
-    pass
+    raise(NotImplementedError)
 
 def mse(y_test, y_forecast):
     """
@@ -51,7 +53,7 @@ def mse(y_test, y_forecast):
     :return: Error
     Computes the MSE error of two TS
     """
-    pass
+    raise(NotImplementedError)
 
 def mape(y_test, y_forecast):
     """
@@ -60,7 +62,8 @@ def mape(y_test, y_forecast):
     :return: Error
     Computes the MAPE error of two time series
     """
-    pass
+    y_test, y_forecast = np.array(y_test), np.array(y_forecast)
+    return np.mean(np.abs((y_test - y_forecast) / y_test)) * 100
 
 def smape(y_test, y_forecast):
     """
@@ -69,40 +72,5 @@ def smape(y_test, y_forecast):
     :return: error
     Computes the SMAPE error of two time series
     """
-    pass
-
-
-=======
-from matplotlib import pyplot as plt
-
-
-def plot(ts):
-    new_df = ts.set_index('Datetime')
-    new_df.plot()
-    plt.show()
-
-
-def histogram(ts):
-    raise NotImplementedError
-
-
-def box_plot(ts):
-    raise NotImplementedError
-
-
-def normality_test(ts):
-    raise NotImplementedError
-
-
-def mse(y_test, t_forecast):
-    raise NotImplementedError
-
-
-def mape(y_test, t_forecast):
-    raise NotImplementedError
-
-
-def smape(y_test, t_forecast):
-    raise NotImplementedError
->>>>>>> 02980b64c9b1fdcee461d4b25639ced48808b233
+    raise(NotImplementedError)
 
