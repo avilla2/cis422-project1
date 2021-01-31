@@ -2,7 +2,6 @@
 import preprocessing
 import modeling
 #import visualization
-import pandas as pd
 import copy
 from anytree import Node, RenderTree, search
 '''
@@ -37,8 +36,7 @@ class tf_tree(object):
 		#Node will make node automatically from anytree
 		if ts:
 			self.node_count += 1
-			df = pd.read_csv(ts)
-			self.root = Node(self.node_count, data=df)#preprocessing.read(ts))
+			self.root = Node(self.node_count, data=preprocessing.read(ts))
 			self.current_node = self.root
 			return True
 		else:
