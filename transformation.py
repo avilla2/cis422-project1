@@ -5,6 +5,7 @@ import modeling
 import copy
 from anytree import Node, RenderTree, search
 '''
+Credit by Jay Shin
 anytree is a great tree library. I believe 
 using this library will save us a lot of time
 '''
@@ -180,7 +181,8 @@ class tf_tree(object):
 							print(pl.operator, " is operator \n")
 							print(transformer, " is data \n")
 							self.exec_operator(pl.operator,transformer)
-			return transformer
+				print(transformer)
+			return True
 		else:
 			return False
 
