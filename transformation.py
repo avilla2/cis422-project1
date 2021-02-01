@@ -1,7 +1,7 @@
 
 import preprocessing
 import modeling
-#import visualization
+import visualization
 import copy
 from anytree import Node, RenderTree, search
 '''
@@ -152,13 +152,17 @@ class tf_tree(object):
 		else:
 			return False
 
-	def exec_operator(self, operator, ts):
+	def exec_operator(self, operator, data):
 		operation = {
-			'denoise': preprocessing.denoise(ts),
-			'impute_missing_date': preprocessing.impute_missing_date(ts),
-			'impute_outliers': preprocessing.impute_outliers(ts),
-			'logarithm': preprocessing.logarithm(ts),
-			'plot': preprocessing.impute_outliers(ts),
+			'denoise': preprocessing.denoise(data),
+			'impute_outliers': preprocessing.impute_outliers(data),
+			'logarithm': preprocessing.logarithm(data),
+			'split': preprocessing.split_data(data, .4, .2, .4),
+			'matrix': preprocessing.design_matrix(data[0], 4, 2, 4, 1),
+			'model': modeling.mlp_model(data),
+			'train': modeling.learn(data[0], data[1]),
+			#'forecast': modeling.forcast(data),
+			'plot': visualization.plot(data)
 		}
 		return operation.get(operator, 'Invalid Index'.format(operator))
 		pass
