@@ -9,7 +9,7 @@ Credit by Jay Shin
 anytree is a great tree library. I believe 
 using this library will save us a lot of time
 '''
-##/Users/hyojaeshin/Desktop/CIS422/Project1/Time Series Data/1_temperature_test.csv
+
 class tf_tree(object): 
 	'''
 	This is TransFormation tree
@@ -19,8 +19,6 @@ class tf_tree(object):
 	def __init__(self):
 		self.root = None
 		self.current_node = None
-		self.leaves = None
-		self.pipeline = None
 		self.node_count = 0
 		self.copy = False
 
@@ -42,7 +40,42 @@ class tf_tree(object):
 			return True
 		else:
 			return False
-		
+
+	def pick_operator(self, op):
+        #Because some nodes need more than data, bring separately saved components
+		operation = {
+			'denoise': preprocessing.denoise,
+			'impute_missing_data': preprocessing.impute_missing_data,
+			'impute_outliers': preprocessing.impute_outliers,
+			'longest_continous_run': preprocessing.longest_continuous_run,
+			'clip': preprocessing.clip,
+			'assign_time': preprocessing.clip,
+			'difference': preprocessing.difference,
+			'scaling': preprocessing.scaling,
+			'standardize': preprocessing.standardize,
+			'logarithm': preprocessing.logarithm,
+			'cubic_root': preprocessing.cubic_root,
+			'split': preprocessing.split_data,
+			'matrix': preprocessing.design_matrix,
+			'matrix': preprocessing.design_matrix,
+			#'ts2db': preprocessing.ts2db,
+            
+			'model': modeling.mlp_model,
+			'train': modeling.learn,
+			#'forecast': modeling.forcast,
+            
+			'plot': visualization.plot,
+			'histogram': visualization.histogram,
+			'box_plot': visualization.box_plot,
+			'normality_test': visualization.normality_test,
+			'mse': visualization.mse,
+			'mape': visualization.mape,
+			'smape': visualization.smape,
+		}
+		return operation.get(op, 'Invalid Index'.format(op))
+
+
+        
 	def add_operator(self, node, op): 
 		'''
 		Add operators to the transformation tree
@@ -58,7 +91,8 @@ class tf_tree(object):
 	            #index is for the numbering purpose
 	            #anytree doesn't allow nodes with same name
 				self.node_count += 1
-				add_node = Node(self.node_count, parent=nd, operator=op)
+				fn = self.pick_operator(op)
+				add_node = Node(self.node_count, parent=nd, operator=fn)
 				self.current_node = add_node 
 				return True
 		else:
@@ -130,41 +164,19 @@ class tf_tree(object):
 		else:
 			return False
 
-	def get_ready_tree(self): 
+	def load_save_tree(self): 
 		'''
 		Load/Save whole tree. ###Load and save where?
 
 		If we know leaves, we can run tree using path of leaf
 		but im not sure, if this is right way to do
 		'''
-		self.leaves = self.root.leaves
-		return self.leaves
+		pass
 
-	def get_ready_pipeline(self, node):
+	def load_save_pipeline(self, node):
 		'''
 		Load/Save a pipeline 
 		'''
-		if node:
-			nd = search.find_by_attr(self.root, node)
-			if nd in self.leaves:
-				self.pipeline = copy.deepcopy(nd.path)
-				return self.pipeline
-		else:
-			return False
-
-	def exec_operator(self, operator, data):
-		operation = {
-			'denoise': preprocessing.denoise(data),
-			'impute_outliers': preprocessing.impute_outliers(data),
-			'logarithm': preprocessing.logarithm(data),
-			'split': preprocessing.split_data(data, .4, .2, .4),
-			'matrix': preprocessing.design_matrix(data[0], 4, 2, 4, 1),
-			'model': modeling.mlp_model(data),
-			'train': modeling.learn(data[0], data[1]),
-			#'forecast': modeling.forcast(data),
-			'plot': visualization.plot(data)
-		}
-		return operation.get(operator, 'Invalid Index'.format(operator))
 		pass
 
 	def exec_tree(self): 
@@ -176,21 +188,14 @@ class tf_tree(object):
 		Contains modeling and forecasting functions
 		then result present
 		'''
-		if self.leaves:
-			transformer = self.root.data.copy()
-			for leaf in self.leaves:
-				for pl in leaf.path:
-					if pl != self.root:
-						if pl.operator:
-							print(pl.operator, " is operator \n")
-							print(transformer, " is data \n")
-							self.exec_operator(pl.operator,transformer)
-				print(transformer)
+		if self.root.leaves:
+			for leaf in self.root.leaves:
+				self.exec_pipeline(leaf.name)
 			return True
 		else:
 			return False
 
-	def exec_pipeline(self): 
+	def exec_pipeline(self, node): 
 		'''
 		Execute a pipeline.
 		If pipeline exists, run all
@@ -198,14 +203,12 @@ class tf_tree(object):
 		Contains modeling and forecasting functions
 		return all the results
 		'''
-		if self.pipeline:
+		if node:
+			nd = search.find_by_attr(self.root, node)
 			transformer = self.root.data.copy()
-			for pl in self.pipeline:
-				if pl != self.root:
-					if pl.operator:
-						print(pl.operator, " is operator \n")
-						print(transformer, " is data \n")
-						self.exec_operator(pl.operator, transformer)
+			for pl in nd.path:
+				if not pl.is_root and (pl.operator):
+					print(pl.operator(transformer))
 			return transformer
 		else:
 			return False
