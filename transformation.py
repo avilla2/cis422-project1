@@ -40,41 +40,6 @@ class tf_tree(object):
 			return True
 		else:
 			return False
-
-	def pick_operator(self, op):
-        #Because some nodes need more than data, bring separately saved components
-		operation = {
-			'denoise': preprocessing.denoise,
-			'impute_missing_data': preprocessing.impute_missing_data,
-			'impute_outliers': preprocessing.impute_outliers,
-			'longest_continous_run': preprocessing.longest_continuous_run,
-			'clip': preprocessing.clip,
-			'assign_time': preprocessing.clip,
-			'difference': preprocessing.difference,
-			'scaling': preprocessing.scaling,
-			'standardize': preprocessing.standardize,
-			'logarithm': preprocessing.logarithm,
-			'cubic_root': preprocessing.cubic_root,
-			'split': preprocessing.split_data,
-			'matrix': preprocessing.design_matrix,
-			'matrix': preprocessing.design_matrix,
-			#'ts2db': preprocessing.ts2db,
-            
-			'model': modeling.mlp_model,
-			'train': modeling.learn,
-			#'forecast': modeling.forcast,
-            
-			'plot': visualization.plot,
-			'histogram': visualization.histogram,
-			'box_plot': visualization.box_plot,
-			'normality_test': visualization.normality_test,
-			'mse': visualization.mse,
-			'mape': visualization.mape,
-			'smape': visualization.smape,
-		}
-		return operation.get(op, 'Invalid Index'.format(op))
-
-
         
 	def add_operator(self, node, op): 
 		'''
@@ -91,8 +56,7 @@ class tf_tree(object):
 	            #index is for the numbering purpose
 	            #anytree doesn't allow nodes with same name
 				self.node_count += 1
-				fn = self.pick_operator(op)
-				add_node = Node(self.node_count, parent=nd, operator=fn)
+				add_node = Node(self.node_count, parent=nd, operator=op)
 				self.current_node = add_node 
 				return True
 		else:
@@ -208,7 +172,35 @@ class tf_tree(object):
 			transformer = self.root.data.copy()
 			for pl in nd.path:
 				if not pl.is_root and (pl.operator):
-					print(pl.operator(transformer))
+					transformer = self.pick_operator(pl.operator)(transformer)
 			return transformer
 		else:
 			return False
+
+	def pick_operator(self, op):
+		if op == 'denoise': return preprocessing.denoise,
+		elif op == 'impute_missing_data': return preprocessing.impute_missing_data
+		elif op == 'impute_outliers': return preprocessing.impute_outliers
+		elif op == 'longest_continous_run': return preprocessing.longest_continuous_run
+		elif op == 'clip': return preprocessing.clip
+		elif op == 'assign_time': return preprocessing.clip
+		elif op == 'difference': return preprocessing.difference
+		elif op == 'scaling': return preprocessing.scaling
+		elif op == 'standardize': return preprocessing.standardize
+		elif op == 'logarithm': return preprocessing.logarithm
+		elif op == 'cubic_root': return preprocessing.cubic_root
+		elif op == 'split': return preprocessing.split_data
+		elif op == 'matrix': return preprocessing.design_matrix
+		elif op == 'matrix': return preprocessing.design_matrix
+		elif op == 'ts2db': return preprocessing.ts2db
+		elif op == 'model': return modeling.mlp_model
+		elif op == 'train': return modeling.learn
+		elif op == 'forecast': return modeling.forcast
+		elif op == 'plot': return visualization.plot
+		elif op == 'histogram': return visualization.histogram
+		elif op == 'box_plot': return visualization.box_plot
+		elif op == 'normality_test': return visualization.normality_test
+		elif op == 'mse': return visualization.mse
+		elif op == 'mape': return visualization.mape
+		elif op == 'smape': return visualization.smape
+		else: return False
