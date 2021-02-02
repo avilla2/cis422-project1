@@ -20,7 +20,6 @@ class tf_tree(object):
 		self.root = None
 		self.current_node = None
 		self.node_count = 0
-		self.copy = False
 
 	def print_tree(self, node):
 		'''
@@ -172,35 +171,54 @@ class tf_tree(object):
 			transformer = self.root.data.copy()
 			for pl in nd.path:
 				if not pl.is_root and (pl.operator):
-					transformer = self.pick_operator(pl.operator)(transformer)
+					transformer = self.pick_operator(pl.operator, transformer)
+					#print("operator : " , pl.operator)
+					#print("data : " , transformer)
 			return transformer
 		else:
 			return False
 
-	def pick_operator(self, op):
-		if op == 'denoise': return preprocessing.denoise,
-		elif op == 'impute_missing_data': return preprocessing.impute_missing_data
-		elif op == 'impute_outliers': return preprocessing.impute_outliers
-		elif op == 'longest_continous_run': return preprocessing.longest_continuous_run
-		elif op == 'clip': return preprocessing.clip
-		elif op == 'assign_time': return preprocessing.clip
-		elif op == 'difference': return preprocessing.difference
-		elif op == 'scaling': return preprocessing.scaling
-		elif op == 'standardize': return preprocessing.standardize
-		elif op == 'logarithm': return preprocessing.logarithm
-		elif op == 'cubic_root': return preprocessing.cubic_root
-		elif op == 'split': return preprocessing.split_data
-		elif op == 'matrix': return preprocessing.design_matrix
-		elif op == 'matrix': return preprocessing.design_matrix
-		elif op == 'ts2db': return preprocessing.ts2db
-		elif op == 'model': return modeling.mlp_model
-		elif op == 'train': return modeling.learn
-		elif op == 'forecast': return modeling.forcast
-		elif op == 'plot': return visualization.plot
-		elif op == 'histogram': return visualization.histogram
-		elif op == 'box_plot': return visualization.box_plot
-		elif op == 'normality_test': return visualization.normality_test
-		elif op == 'mse': return visualization.mse
-		elif op == 'mape': return visualization.mape
-		elif op == 'smape': return visualization.smape
+	def pick_operator(self, op, data):
+		new_data = {}
+		if op == 'denoise': return preprocessing.denoise(data)
+		elif op == 'impute_missing_data': return preprocessing.impute_missing_data(data)
+		elif op == 'impute_outliers': return preprocessing.impute_outliers(data)
+		elif op == 'longest_continous_run': return preprocessing.longest_continuous_run(data)
+		elif op == 'clip': 
+			new_data[0] = data
+			new_data[1] = input('Start Date: ')
+			new_data[2] = input('Final Date: ')
+			return preprocessing.clip(new_data[0], new_data[1], new_data[2])
+		elif op == 'assign_time': 
+			new_data[0] = data
+			new_data[1] = input('Start Date: ')
+			new_data[2] = input('Increment: ')
+			return preprocessing.assign_time(new_data[0], new_data[1], new_data[2])
+		elif op == 'difference': return preprocessing.difference(data)
+		elif op == 'scaling': return preprocessing.scaling(data)
+		elif op == 'standardize': return preprocessing.standardize(data)
+		elif op == 'logarithm': return preprocessing.logarithm(data)
+		elif op == 'cubic_root': return preprocessing.cubic_root(data)
+		elif op == 'split': 
+			new_data[0] = data
+			new_data[1] = float(input('Training %: '))
+			new_data[2] = float(input('Valid %: '))
+			new_data[3] = float(input('Test %: '))
+			return preprocessing.split_data(new_data[0], new_data[1], new_data[2], new_data[3])
+		elif op == 'matrix3': 
+			return preprocessing.design_matrix(data)
+		elif op == 'matrix5': 
+			print("this is data : ", data)
+			return preprocessing.design_matrix(data)
+		elif op == 'ts2db': return preprocessing.ts2db(data)
+		elif op == 'model': return modeling.mlp_model(data)
+		elif op == 'train': return modeling.learn(data)
+		elif op == 'forecast': return modeling.forcast(data)
+		elif op == 'plot': return visualization.plot(data)
+		elif op == 'histogram': return visualization.histogram(data)
+		elif op == 'box_plot': return visualization.box_plot(data)
+		elif op == 'normality_test': return visualization.normality_test(data)
+		elif op == 'mse': return visualization.mse(data)
+		elif op == 'mape': return visualization.mape(data)
+		elif op == 'smape': return visualization.smape(data)
 		else: return False
