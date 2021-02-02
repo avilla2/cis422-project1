@@ -30,7 +30,7 @@ def denoise(ts: pd.DataFrame) -> None:
     """
     # Implementing 5 point moving average
     ts["Data"] = ts.rolling(window=5).mean()
-
+    return ts
 
 def impute_missing_data(ts):
     """
