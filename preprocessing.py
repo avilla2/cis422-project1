@@ -104,6 +104,7 @@ def logarithm(ts):
     elements.
     """
     ts.iloc[:, -1:] = log10(ts.iloc[:, -1:])
+    return ts
 
 
 def cubic_root(ts):
