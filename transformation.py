@@ -172,8 +172,8 @@ class tf_tree(object):
 			for pl in nd.path:
 				if not pl.is_root and (pl.operator):
 					transformer = self.pick_operator(pl.operator, transformer)
-					#print("operator : " , pl.operator)
-					#print("data : " , transformer)
+					print("operator : " , pl.operator)
+					print("data : " , transformer)
 			return transformer
 		else:
 			return False
