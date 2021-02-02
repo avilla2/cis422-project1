@@ -1,5 +1,5 @@
 import pandas as pd
-import math
+from numpy import log10
 
 """
 parameters
@@ -18,7 +18,7 @@ def read(input):
     elif y == 2:
         df = pd.read_csv(input, parse_dates={'Datetime': [0]}, infer_datetime_format=True)
     else:
-        df = pd.read_csv(input)
+        df = pd.read_csv(input, names=["Time Series"])
     return df
 
 
@@ -29,7 +29,7 @@ def denoise(ts: pd.DataFrame) -> None:
     (included in the Pandas library.)
     """
     # Implementing 5 point moving average
-    ts["Data"] = ts.rolling(window=5).mean()
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].rolling(window=5).mean()
     return ts
 
 def impute_missing_data(ts):
@@ -90,10 +90,12 @@ def scaling(ts):
 
 
 def standardize(ts):
-    '''
+    """
     Produces a time series whose mean is 0 and variance is 1.
-    '''
-    pass
+    """
+    mu = float(ts.iloc[:, -1:].mean())
+    sigma = float(ts.iloc[:, -1:].std())
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - mu)/sigma)
 
 
 def logarithm(ts):
@@ -101,14 +103,14 @@ def logarithm(ts):
     Produces a time series whose elements are the logarithm of the original
     elements.
     """
-    ts["Data"] = ts["Data"].apply(lambda x: math.log(x, 10))
+    ts.iloc[:, -1:] = log10(ts.iloc[:, -1:])
 
 
 def cubic_root(ts):
-    '''
+    """
     Produces a time series whose elements are the original elements’ cubic root
-    '''
-    ts["Data"] = ts["Data"].apply(lambda x: x**(1/3))
+    """
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: x**(1/3))
 
 
 # Splits the data based on the percents (in decimal notation).
