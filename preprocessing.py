@@ -1,5 +1,6 @@
 import pandas as pd
 from numpy import log10
+import sklearn as sk
 
 """
 parameters
@@ -31,6 +32,7 @@ def denoise(ts: pd.DataFrame) -> None:
     # Implementing 5 point moving average
     ts.iloc[:, -1:] = ts.iloc[:, -1:].rolling(window=5).mean()
     return ts
+
 
 def impute_missing_data(ts):
     """
@@ -86,7 +88,10 @@ def scaling(ts):
     Produces a time series whose magnitudes are scaled so that the resulting
     magnitudes range in the interval [0,1].
     '''
-    pass
+    floor = float(ts.iloc[:, -1:].min())
+    ceiling = float(ts.iloc[:, -1:].max())
+    diff = ceiling - floor  # range
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - floor) / diff)
 
 
 def standardize(ts):
@@ -95,7 +100,7 @@ def standardize(ts):
     """
     mu = float(ts.iloc[:, -1:].mean())
     sigma = float(ts.iloc[:, -1:].std())
-    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - mu)/sigma)
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - mu) / sigma)
 
 
 def logarithm(ts):
@@ -110,7 +115,7 @@ def cubic_root(ts):
     """
     Produces a time series whose elements are the original elements’ cubic root
     """
-    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: x**(1/3))
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: x ** (1 / 3))
 
 
 # Splits the data based on the percents (in decimal notation).
@@ -126,9 +131,9 @@ def split_data(df, perc_training=.4, perc_valid=.3, perc_test=.3):
     t1 = round(x * perc_training)
     t2 = round(x * perc_valid) + t1
 
-    train_df = df.iloc[:t1,:]
-    valid_df = df.iloc[t1:t2,:]
-    test_df = df.iloc[t2:,:]
+    train_df = df.iloc[:t1, :]
+    valid_df = df.iloc[t1:t2, :]
+    test_df = df.iloc[t2:, :]
 
     return train_df, valid_df, test_df
 
