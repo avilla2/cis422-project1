@@ -1,6 +1,6 @@
 import pandas as pd
 from numpy import log10
-import sklearn as sk
+import numpy as np
 
 """
 parameters
@@ -10,16 +10,16 @@ returns
 """
 
 
-def read(input):
+def read(filename):
     # df = pd.read_csv(input, parse_dates=True, infer_datetime_format=True)  # use if there's only one date/time column
-    df = pd.read_csv(input, nrows=1)
+    df = pd.read_csv(filename, nrows=1)
     x, y = df.shape
     if y == 3:
-        df = pd.read_csv(input, parse_dates={'Datetime': [0, 1]}, infer_datetime_format=True)
+        df = pd.read_csv(filename, parse_dates={'Datetime': [0, 1]}, infer_datetime_format=True)
     elif y == 2:
-        df = pd.read_csv(input, parse_dates={'Datetime': [0]}, infer_datetime_format=True)
+        df = pd.read_csv(filename, parse_dates={'Datetime': [0]}, infer_datetime_format=True)
     else:
-        df = pd.read_csv(input, names=["Time Series"])
+        df = pd.read_csv(filename, names=["Time Series"])
     return df
 
 
@@ -136,6 +136,10 @@ def split_data(df, perc_training=.4, perc_valid=.3, perc_test=.3):
     valid_df = df.iloc[t1:t2, :]
     test_df = df.iloc[t2:, :]
 
+    train_df.reset_index(drop=True, inplace=True)
+    valid_df.reset_index(drop=True, inplace=True)
+    test_df.reset_index(drop=True, inplace=True)
+
     return train_df, valid_df, test_df
 
 
@@ -160,7 +164,6 @@ returns
     two matrices
 """
 
-
 def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     x, y = df.shape
 
@@ -169,9 +172,11 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     for i in range(mi):
         tail = i * ti
         input_array.append(tail)
-        tail += 1
+        #tail += 1
     output_array = []
-    for i in range(mo):
+    for i in range(mo + 1):
+        if i == 0:
+            continue
         output_array.append(i * to + tail)
 
     # print(input_array, output_array)
@@ -195,7 +200,7 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     # print(input_matrix)
     # print(output_matrix)
 
-    return output_matrix, input_matrix
+    return input_matrix, output_matrix
 
 
 def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
@@ -205,3 +210,29 @@ def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
     data, converting to database, and producing the training databases.
     '''
     pass
+
+
+def forecast(n, model, test_df, mi, ti, mo, to):
+    test_matrix_x, test_matrix_y = design_matrix(test_df, mi, ti, mo, to)
+    forecast_array = []
+
+    x = mi * ti + to
+    time_array = []
+    for j in range(n):
+        array = test_matrix_x[j]
+        prediction = model.predict([array])[0]
+        # print(type(array), array)
+        if type(prediction) == np.ndarray:
+            forecast_array = prediction
+        else:
+            forecast_array.append(prediction)
+        for i in range(mo):
+            time = test_df.iloc[x, 0]
+            time_array.append(time)
+            x += to
+
+    column_names = test_df.columns.values.tolist()
+    forecast_dataframe = pd.DataFrame(list(zip(time_array, forecast_array)), columns=[column_names[0], column_names[1]])
+
+    return forecast_array, forecast_dataframe
+
