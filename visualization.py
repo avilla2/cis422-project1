@@ -1,7 +1,8 @@
-<<<<<<< HEAD
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import stats
+
 
 def plot(ts):
     """
@@ -12,6 +13,7 @@ def plot(ts):
     new_df = ts.set_index('Datetime')
     new_df.plot()
     plt.show()
+
 
 def histogram(ts):
     """
@@ -25,6 +27,7 @@ def histogram(ts):
     new_df.hist()
     plt.show()
 
+
 def box_plot(ts):
     """
     :param ts: Time series data
@@ -36,6 +39,7 @@ def box_plot(ts):
     new_df.boxplot()
     plt.show()
 
+
 def normality_test(ts):
     """
     :param ts: Time series data
@@ -44,7 +48,8 @@ def normality_test(ts):
     time series data distribution
     matplotlib qqplot
     """
-    raise(NotImplementedError)
+    return stats.shapiro(ts)
+
 
 def mse(y_test, y_forecast):
     """
@@ -53,7 +58,9 @@ def mse(y_test, y_forecast):
     :return: Error
     Computes the MSE error of two TS
     """
-    raise(NotImplementedError)
+    ax = None
+    return (np.square(y_test - y_forecast)).mean(axix=ax)
+
 
 def mape(y_test, y_forecast):
     """
@@ -65,6 +72,7 @@ def mape(y_test, y_forecast):
     y_test, y_forecast = np.array(y_test), np.array(y_forecast)
     return np.mean(np.abs((y_test - y_forecast) / y_test)) * 100
 
+
 def smape(y_test, y_forecast):
     """
     :param y_test: Y TS data
@@ -72,5 +80,5 @@ def smape(y_test, y_forecast):
     :return: error
     Computes the SMAPE error of two time series
     """
-    raise(NotImplementedError)
+    return 1/len(y_test) * np.sum(2 * np.abs(y_forecast - y_test) / (np.abs(y_test) + np.abs(y_forecast)) * 100)
 
