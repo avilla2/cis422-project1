@@ -217,7 +217,7 @@ def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
     pass
 
 
-def forecast(n, model, test_df, mi, ti, mo, to):
+def forecast_op(n, model, test_df, mi, ti, mo, to):
     test_matrix_x, test_matrix_y = design_matrix(test_df, mi, ti, mo, to)
     forecast_array = []
 
