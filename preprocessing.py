@@ -1,6 +1,6 @@
 import pandas as pd
 from numpy import log10
-import numpy as np
+from datetime import datetime
 
 """
 parameters
@@ -31,7 +31,6 @@ def denoise(ts: pd.DataFrame) -> None:
     """
     # Implementing 5 point moving average
     ts.iloc[:, -1:] = ts.iloc[:, -1:].rolling(window=5).mean()
-    return ts
 
 
 def impute_missing_data(ts):
@@ -44,50 +43,54 @@ def impute_missing_data(ts):
 
 
 def impute_outliers(ts):
-    '''
+    """
     – Outliers are disparate data that we can treat as missing data. Use the
     same procedure as for missing data (sklearn implements outlier detection.) This function is better
     applied using the higher dimensional data produced by TS2DB (see below.)
-    '''
+    """
     pass
 
 
 def longest_continuous_run(ts):
-    '''
+    """
     – Isolates the most extended portion of the time series without
     missing data. It returns a time series.
-    '''
+    """
     pass
 
 
 def clip(ts, starting_date, final_date):
-    '''
+    """
     clips the time series to the specified period’s data.
-    '''
+    """
     pass
 
 
 def assign_time(ts, start, increment):
-    '''
+    """
     In many cases, we do not have the times associated
     with a sequence of readings. Start and increment represent t0 delta, respectively.
-    '''
-    pass
+    """
+    length = ts.iloc[:, -1:].size 
+    end = (length * increment) + start 
+    if "Datetime" not in ts:
+        ts.insert(0, "Datetime", [datetime(2010,1,1, hour=(x//3600), minute=(x//60%60), second=(x%60)) for x in range(start, end, increment)])
+        
 
 
 def difference(ts):
-    '''
+    """
     Produces a time series whose magnitudes are the differences between
     consecutive elements in the original time series.
-    '''
-    pass
+    """
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].diff()
 
 
 def scaling(ts):
-    '''
+    """
     Produces a time series whose magnitudes are scaled so that the resulting
     magnitudes range in the interval [0,1].
-    '''
+    """
     floor = float(ts.iloc[:, -1:].min())
     ceiling = float(ts.iloc[:, -1:].max())
     diff = ceiling - floor  # range
