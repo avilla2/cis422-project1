@@ -213,7 +213,7 @@ class tf_tree(object):
 			test = float(input('Test % : '))
 			data = preprocessing.split_data(data, train, valid, test)
 			ly1, ly2, ly3 = input("Enter Layers ly1, ly2, ly3 : ").split()
-			node.model = modeling.mlp_model((ly1,ly2,ly3))
+			node.model = modeling.mlp_model((int(ly1),int(ly2),int(ly3)))
 			return data
 		elif op == 'create_train':
 			node.model = node.parent.model
@@ -231,7 +231,7 @@ class tf_tree(object):
 			node.model.fit(train_x, train_y)
 			return dfs, mt
 		elif op == 'forecast': 
-			n = input('Enter number of forecasts : ')
+			n = int(input('Enter number of forecasts : '))
 			node.model = node.parent.model
 			dfs = data[0]
 			mt = data[1]
