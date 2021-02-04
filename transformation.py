@@ -1,10 +1,11 @@
 
-#import preprocessing
-#import modeling
-
+import preprocessing
+import modeling
+import visualization
 import copy
-from anytree import Node, RenderTree
+from anytree import Node, RenderTree, search
 '''
+Credit by Jay Shin
 anytree is a great tree library. I believe 
 using this library will save us a lot of time
 '''
@@ -18,8 +19,7 @@ class tf_tree(object):
 	def __init__(self):
 		self.root = None
 		self.current_node = None
-		self.leaves = None
-		self.pipeline = None
+		self.node_count = 0
 
 	def print_tree(self, node):
 		'''
@@ -27,15 +27,19 @@ class tf_tree(object):
 		'''
 		print(RenderTree(node))
 
-	def create_tree(self, title, ts): 
+	def create_tree(self, ts): 
 		'''
 		Create a new tree : initialize tree
 		'''
 		#Node will make node automatically from anytree
-		self.root = Node(title, data=ts)#preprocesesing.read(ts))
-		self.current_node = self.root
-		return self.current_node
-		
+		if ts:
+			self.node_count += 1
+			self.root = Node(self.node_count, data=preprocessing.read(ts))
+			self.current_node = self.root
+			return True
+		else:
+			return False
+        
 	def add_operator(self, node, op): 
 		'''
 		Add operators to the transformation tree
@@ -44,39 +48,31 @@ class tf_tree(object):
 		
 		We need to get function from user which will be choices
 		Easist way to handle cornercases
-
-		We have to make sure that we only providing this function
-		when user create_tree first (user must provide ts)
-
-		pnode is for parent node
 		'''
 		if self.root:
-			if op and node.data:
+			nd = search.find_by_attr(self.root, node)
+			if nd and op:
 	            #index is for the numbering purpose
 	            #anytree doesn't allow nodes with same name
-				name = "operator_" + op
-				self.current_node = Node(name, parent=node, operator=op, data=node.data.copy()) 
+				self.node_count += 1
+				add_node = Node(self.node_count, parent=nd, operator=op)
+				self.current_node = add_node 
 				return True
-			else:
-				print("Insufficient Arguments : node, operator")
 		else:
 			return False
 
 
-	def replace_process(self, node, prc): 
+	def replace_process(self, node, op): 
 		'''
-	    This function is to fix node to new operator
-		Replace a process step with a different operator. 
-		-difference(ts)   -scaling(ts)   -standardize(ts)   -logarithm(ts)   -cubic_root(ts)
-		from preprocesesing or it has to be on add_operator
+	    This function is to fix node's operator to new one
+		from preprocesesing
 		'''
 		if self.root:
-			if prc and node.data:
-				name = "process_" + prc
-				self.current_node = Node(name, parent=node, process=prc, data=node.data.copy())
+			nd = search.find_by_attr(self.root, node)
+			if op and nd:
+				nd.operator = op
+				nd.children = nd.children
 				return True
-			else:
-				print("Insufficient Arguments : node, operator")
 		else:
 			return False
 	        
@@ -86,11 +82,19 @@ class tf_tree(object):
 		using deepcopy mathod, copy data but separate from original
 		and return the copied subtree
 		'''
-		copy_name = node.name + "_copy"
-		copy_node = copy.deepcopy(node)
-		copy_node.parent = None
-		copy_node.name = copy_name
-		return copy_node
+		if node:
+			nd = search.find_by_attr(self.root, node)
+			copy_node = copy.deepcopy(nd)
+			self.node_count += 1
+			copy_node.name = self.node_count
+			for descendant in copy_node.descendants:
+				self.node_count += 1
+				descendant.name = self.node_count
+			copy_node.parent = None
+			return copy_node
+		else:
+			return False
+
 
 	def replicate_tree_path(self, node):
 		'''
@@ -100,40 +104,44 @@ class tf_tree(object):
 		and return the copied path
 		'''
 		if node:
-			copy_nodes = copy.deepcopy(node.path)
+			nd = search.find_by_attr(self.root, node)
+			copy_nodes = copy.deepcopy(nd.path)
+			for cp in copy_nodes:
+				#because it is path, [0] is always root
+				self.node_count += 1
+				cp.name = self.node_count
+			copy_nodes[0].parent = None
 			return copy_nodes
 		else:
-			print("node is empty!")
+			return False
 
-	def add_subtree(self, pnode, node):
+	def add_subtree(self, node, to_node):
 		'''
 		Add a subtree to a node. 
 		Add path to input node children list
 		Make this node a sibling of current node
 		'''
-		if pnode and node:
-			node.parent = pnode
+		if node and to_node:
+			tnd = search.find_by_attr(self.root, to_node)
+			node.parent = tnd
+			return True
+		else:
+			return False
 
-	def get_ready_tree(self): 
+	def load_save_tree(self): 
 		'''
 		Load/Save whole tree. ###Load and save where?
 
 		If we know leaves, we can run tree using path of leaf
 		but im not sure, if this is right way to do
 		'''
-		self.leaves = self.root.leaves
-		return True
+		pass
 
-	def get_ready_pipeline(self, node):
+	def load_save_pipeline(self, node):
 		'''
 		Load/Save a pipeline 
-
-		If user node is a leaf, we can run single pip using path of leaf
-		but im not sure, if this is right way to do
 		'''
-		if node.name in self.leaves.name:
-			self.pipline = replicate_tree_path(node)
-		return self.pipline
+		pass
 
 	def exec_tree(self): 
 		'''
@@ -144,14 +152,14 @@ class tf_tree(object):
 		Contains modeling and forecasting functions
 		then result present
 		'''
-		if self.leaves:
-			for leaf in self.leaves:
-				leaf_path = replicate_tree_path(leaf)
-				for path in leaf_path:
-					#have to execute each node now
-					return True
+		if self.root.leaves:
+			for leaf in self.root.leaves:
+				self.exec_pipeline(leaf.name)
+			return True
+		else:
+			return False
 
-	def exec_pipeline(self): 
+	def exec_pipeline(self, node): 
 		'''
 		Execute a pipeline.
 		If pipeline exists, run all
@@ -159,10 +167,59 @@ class tf_tree(object):
 		Contains modeling and forecasting functions
 		return all the results
 		'''
-		if self.current_pip:
-			for node in self.current_pip:
-				#have to execute each node now
-				return True
+		if node:
+			nd = search.find_by_attr(self.root, node)
+			transformer = self.root.data.copy()
+			for pl in nd.path:
+				if not pl.is_root and (pl.operator):
+					transformer = self.pick_operator(pl.operator, transformer)
+					print("operator : " , pl.operator)
+					print("data : " , transformer)
+			return transformer
+		else:
+			return False
 
-
-
+	def pick_operator(self, op, data):
+		new_data = {}
+		if op == 'denoise': return preprocessing.denoise(data)
+		elif op == 'impute_missing_data': return preprocessing.impute_missing_data(data)
+		elif op == 'impute_outliers': return preprocessing.impute_outliers(data)
+		elif op == 'longest_continous_run': return preprocessing.longest_continuous_run(data)
+		elif op == 'clip': 
+			new_data[0] = data
+			new_data[1] = input('Start Date: ')
+			new_data[2] = input('Final Date: ')
+			return preprocessing.clip(new_data[0], new_data[1], new_data[2])
+		elif op == 'assign_time': 
+			new_data[0] = data
+			new_data[1] = input('Start Date: ')
+			new_data[2] = input('Increment: ')
+			return preprocessing.assign_time(new_data[0], new_data[1], new_data[2])
+		elif op == 'difference': return preprocessing.difference(data)
+		elif op == 'scaling': return preprocessing.scaling(data)
+		elif op == 'standardize': return preprocessing.standardize(data)
+		elif op == 'logarithm': return preprocessing.logarithm(data)
+		elif op == 'cubic_root': return preprocessing.cubic_root(data)
+		elif op == 'split': 
+			new_data[0] = data
+			new_data[1] = float(input('Training %: '))
+			new_data[2] = float(input('Valid %: '))
+			new_data[3] = float(input('Test %: '))
+			return preprocessing.split_data(new_data[0], new_data[1], new_data[2], new_data[3])
+		elif op == 'matrix3': 
+			return preprocessing.design_matrix(data)
+		elif op == 'matrix5': 
+			print("this is data : ", data)
+			return preprocessing.design_matrix(data)
+		elif op == 'ts2db': return preprocessing.ts2db(data)
+		elif op == 'model': return modeling.mlp_model(data)
+		elif op == 'train': return modeling.learn(data)
+		elif op == 'forecast': return modeling.forcast(data)
+		elif op == 'plot': return visualization.plot(data)
+		elif op == 'histogram': return visualization.histogram(data)
+		elif op == 'box_plot': return visualization.box_plot(data)
+		elif op == 'normality_test': return visualization.normality_test(data)
+		elif op == 'mse': return visualization.mse(data)
+		elif op == 'mape': return visualization.mape(data)
+		elif op == 'smape': return visualization.smape(data)
+		else: return False

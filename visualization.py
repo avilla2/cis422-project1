@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> d3fc0ce1868d17cd85b60ac1057713b8b1f5d5f0
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
