@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from numpy import log10
 from datetime import datetime
 
@@ -166,7 +167,6 @@ parameters
 returns
     two matrices
 """
-
 def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     x, y = df.shape
 
@@ -175,33 +175,35 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     for i in range(mi):
         tail = i * ti
         input_array.append(tail)
-        #tail += 1
     output_array = []
     for i in range(mo + 1):
         if i == 0:
             continue
         output_array.append(i * to + tail)
 
-    # print(input_array, output_array)
-    # print(df.iloc[input_array])
-    # print(df.iloc[output_array])
-
     input_matrix = []
     output_matrix = []
-    while output_array[-1] < x:
-        i_frames = []
-        o_frames = []
-        for i in input_array:
-            i_frames.append(df.iloc[i, 1])
-        for i in output_array:
-            o_frames.append(df.iloc[i, 1])
-        input_matrix.append(i_frames)
-        output_matrix.append(o_frames)
-        input_array = [x + 1 for x in input_array]
-        output_array = [x + 1 for x in output_array]
-
-    # print(input_matrix)
-    # print(output_matrix)
+    if mo == 1:
+        while output_array[-1] < x:
+            i_frames = []
+            for i in input_array:
+                i_frames.append(df.iloc[i, 1])
+            input_matrix.append(i_frames)
+            output_matrix.append(df.iloc[output_array[0], 1])
+            input_array = [x + 1 for x in input_array]
+            output_array = [x + 1 for x in output_array]
+    else:
+        while output_array[-1] < x:
+            i_frames = []
+            o_frames = []
+            for i in input_array:
+                i_frames.append(df.iloc[i, 1])
+            for i in output_array:
+                o_frames.append(df.iloc[i, 1])
+            input_matrix.append(i_frames)
+            output_matrix.append(o_frames)
+            input_array = [x + 1 for x in input_array]
+            output_array = [x + 1 for x in output_array]
 
     return input_matrix, output_matrix
 
