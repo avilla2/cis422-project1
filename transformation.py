@@ -226,8 +226,6 @@ class tf_tree(object):
 				train_x, train_y = preprocessing.design_matrix(dfs[1], mt[0], mt[1], mt[2], mt[3])
 			elif dftype.lower() == 'test':
 				train_x, train_y = preprocessing.design_matrix(dfs[2], mt[0], mt[1], mt[2], mt[3])
-			print(train_y)
-			print("This Halo is model : ", node.model)
 			node.model.fit(train_x, train_y)
 			return dfs, mt
 		elif op == 'forecast': 
@@ -235,7 +233,7 @@ class tf_tree(object):
 			node.model = node.parent.model
 			dfs = data[0]
 			mt = data[1]
-			ret = preprocessing.forecast(n, model, dfs[3], mt[0], mt[1], mt[2], mt[3])
+			ret = preprocessing.forecast_op(n, node.model, dfs[2], mt[0], mt[1], mt[2], mt[3])
 			return ret[1]
 		elif op == 'ts2db': return preprocessing.ts2db(data)
 		elif op == 'plot': 
