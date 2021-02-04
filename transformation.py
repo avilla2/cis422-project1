@@ -1,4 +1,3 @@
-
 import preprocessing
 import modeling
 import visualization
@@ -20,7 +19,8 @@ class tf_tree(object):
 		self.root = None
 		self.current_node = None
 		self.node_count = 0
-
+		self.results = {}
+        
 	def print_tree(self, node):
 		'''
 		using anytree function RenderTree, display tree with node as root
@@ -58,6 +58,13 @@ class tf_tree(object):
 				add_node = Node(self.node_count, parent=nd, operator=op)
 				self.current_node = add_node 
 				return True
+		else:
+			return False
+
+	def remove_operator(self, node):
+		if self.root:
+			nd = search.find_by_attr(self.root, node)
+			nd.parent = None
 		else:
 			return False
 
@@ -154,8 +161,8 @@ class tf_tree(object):
 		'''
 		if self.root.leaves:
 			for leaf in self.root.leaves:
-				self.exec_pipeline(leaf.name)
-			return True
+				self.results[int(leaf.name)] = self.exec_pipeline(leaf.name)
+			return self.results
 		else:
 			return False
 
@@ -169,53 +176,70 @@ class tf_tree(object):
 		'''
 		if node:
 			nd = search.find_by_attr(self.root, node)
-			transformer = self.root.data.copy()
 			for pl in nd.path:
 				if not pl.is_root and (pl.operator):
-					transformer = self.pick_operator(pl.operator, transformer)
+					pl.data = pl.parent.data
+					pl.data = self.pick_operator(pl)
 					print("operator : " , pl.operator)
-					print("data : " , transformer)
-			return transformer
+					print("data : " , pl.data)
+			return pl.data
 		else:
 			return False
 
-	def pick_operator(self, op, data):
+	def pick_operator(self, node):
 		new_data = {}
+		data = node.data
+		op = node.operator
 		if op == 'denoise': return preprocessing.denoise(data)
 		elif op == 'impute_missing_data': return preprocessing.impute_missing_data(data)
 		elif op == 'impute_outliers': return preprocessing.impute_outliers(data)
 		elif op == 'longest_continous_run': return preprocessing.longest_continuous_run(data)
 		elif op == 'clip': 
-			new_data[0] = data
-			new_data[1] = input('Start Date: ')
-			new_data[2] = input('Final Date: ')
-			return preprocessing.clip(new_data[0], new_data[1], new_data[2])
+			start = input('Start Date : ')
+			final = input('Final Date : ')
+			return preprocessing.clip(data, start, final)
 		elif op == 'assign_time': 
-			new_data[0] = data
-			new_data[1] = input('Start Date: ')
-			new_data[2] = input('Increment: ')
-			return preprocessing.assign_time(new_data[0], new_data[1], new_data[2])
+			start = input('Start Date : ')
+			inc = input('Increment : ')
+			return preprocessing.assign_time(data, start, inc)
 		elif op == 'difference': return preprocessing.difference(data)
 		elif op == 'scaling': return preprocessing.scaling(data)
 		elif op == 'standardize': return preprocessing.standardize(data)
 		elif op == 'logarithm': return preprocessing.logarithm(data)
 		elif op == 'cubic_root': return preprocessing.cubic_root(data)
-		elif op == 'split': 
-			new_data[0] = data
-			new_data[1] = float(input('Training %: '))
-			new_data[2] = float(input('Valid %: '))
-			new_data[3] = float(input('Test %: '))
-			return preprocessing.split_data(new_data[0], new_data[1], new_data[2], new_data[3])
-		elif op == 'matrix3': 
-			return preprocessing.design_matrix(data)
-		elif op == 'matrix5': 
-			print("this is data : ", data)
-			return preprocessing.design_matrix(data)
+		elif op == 'split_models': 
+			train = float(input('Training % : '))
+			valid = float(input('Valid % : '))
+			test = float(input('Test % : '))
+			data = preprocessing.split_data(data, train, valid, test)
+			ly1, ly2, ly3 = input("Enter Layers ly1, ly2, ly3 : ").split()
+			node.model = modeling.mlp_model((ly1,ly2,ly3))
+			return data
+		elif op == 'create_train':
+			node.model = node.parent.model
+			dfs = node.data
+			mt = list(map(int, input('Enter mi, ti, mo,to : ').split()))
+			dftype = input('Enter data frame type : ')
+			if dftype.lower() == 'train':
+				train_x, train_y = preprocessing.design_matrix(dfs[0], mt[0], mt[1], mt[2], mt[3])
+			elif dftype.lower() == 'valid':
+				train_x, train_y = preprocessing.design_matrix(dfs[1], mt[0], mt[1], mt[2], mt[3])
+			elif dftype.lower() == 'test':
+				train_x, train_y = preprocessing.design_matrix(dfs[2], mt[0], mt[1], mt[2], mt[3])
+			print(train_y)
+			print("This Halo is model : ", node.model)
+			node.model.fit(train_x, train_y)
+			return dfs, mt
+		elif op == 'forecast': 
+			n = input('Enter number of forecasts : ')
+			node.model = node.parent.model
+			dfs = data[0]
+			mt = data[1]
+			ret = preprocessing.forecast(n, model, dfs[3], mt[0], mt[1], mt[2], mt[3])
+			return ret[1]
 		elif op == 'ts2db': return preprocessing.ts2db(data)
-		elif op == 'model': return modeling.mlp_model(data)
-		elif op == 'train': return modeling.learn(data)
-		elif op == 'forecast': return modeling.forcast(data)
-		elif op == 'plot': return visualization.plot(data)
+		elif op == 'plot': 
+			return visualization.plot(data)
 		elif op == 'histogram': return visualization.histogram(data)
 		elif op == 'box_plot': return visualization.box_plot(data)
 		elif op == 'normality_test': return visualization.normality_test(data)

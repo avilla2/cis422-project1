@@ -31,7 +31,7 @@ def denoise(ts: pd.DataFrame) -> None:
     """
     # Implementing 5 point moving average
     ts.iloc[:, -1:] = ts.iloc[:, -1:].rolling(window=5).mean()
-
+    return ts
 
 def impute_missing_data(ts):
     """
@@ -84,7 +84,7 @@ def difference(ts):
     consecutive elements in the original time series.
     """
     ts.iloc[:, -1:] = ts.iloc[:, -1:].diff()
-
+    return ts
 
 def scaling(ts):
     """
@@ -95,7 +95,7 @@ def scaling(ts):
     ceiling = float(ts.iloc[:, -1:].max())
     diff = ceiling - floor  # range
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - floor) / diff)
-
+    return ts
 
 def standardize(ts):
     """
@@ -104,7 +104,7 @@ def standardize(ts):
     mu = float(ts.iloc[:, -1:].mean())
     sigma = float(ts.iloc[:, -1:].std())
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - mu) / sigma)
-
+    return ts
 
 def logarithm(ts):
     """
@@ -120,7 +120,7 @@ def cubic_root(ts):
     Produces a time series whose elements are the original elements’ cubic root
     """
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: x ** (1 / 3))
-
+    return ts
 
 # Splits the data based on the percents (in decimal notation).
 # Percents must add to 1.0 and training and test percents cannot be 0.0.
