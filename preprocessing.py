@@ -1,7 +1,8 @@
 import pandas as pd
-import numpy as np
 from numpy import log10
 from datetime import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 """
 parameters
@@ -24,7 +25,7 @@ def read(filename):
     return df
 
 
-def denoise(ts: pd.DataFrame) -> None:
+def denoise(ts: pd.DataFrame) -> pd.DataFrame:
     """
     Removes noise from a time series. Produces a time series with less noise than
     the original one. This function can be implemented using moving (or rolling) media or median
@@ -34,13 +35,28 @@ def denoise(ts: pd.DataFrame) -> None:
     ts.iloc[:, -1:] = ts.iloc[:, -1:].rolling(window=5).mean()
     return ts
 
+def _predict_point(ts, value):
+    """
+    Predict the value of a point using linear regression
+    """
+    x_train, x_test, y_train, y_test = train_test_split(ts.iloc[:, -1:], ts.iloc[:, -1:], test_size=0.2, random_state=101)
+    lm = LinearRegression().fit(x_train, y_train)
+    print(value)
+    pred = lm.predict(value)
+    return pred
+
+
 def impute_missing_data(ts):
     """
     Missing data are often encoded as blanks, NaNs, or other
     placeholders. At this point, let us assume that a single point is missing, and it can be computed
     from its adjacent points in time.
     """
-    pass
+    m = float(ts.iloc[:, -1:].mean())
+    for i in ts.iloc[:, -1:].index:
+        if pd.isna(ts.iloc[i, -1:]).bool():
+            ts.iloc[i, -1:] = m
+            
 
 
 def impute_outliers(ts):
@@ -64,7 +80,7 @@ def clip(ts, starting_date, final_date):
     """
     clips the time series to the specified period’s data.
     """
-    pass
+    return ts.iloc[starting_date:final_date, -1:]
 
 
 def assign_time(ts, start, increment):
@@ -76,7 +92,7 @@ def assign_time(ts, start, increment):
     end = (length * increment) + start 
     if "Datetime" not in ts:
         ts.insert(0, "Datetime", [datetime(2010,1,1, hour=(x//3600), minute=(x//60%60), second=(x%60)) for x in range(start, end, increment)])
-        
+    return ts
 
 
 def difference(ts):
