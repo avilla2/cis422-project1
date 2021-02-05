@@ -3,6 +3,7 @@ import modeling
 import visualization
 import copy
 import operations
+import pickle
 from anytree import Node, RenderTree, search
 '''
 Credit by Jay Shin
@@ -26,7 +27,10 @@ class tf_tree(object):
 		'''
 		using anytree function RenderTree, display tree with node as root
 		'''
-		print(RenderTree(node))
+		nd = search.find_by_attr(self.root, node)
+		if nd:
+			for pre, fill, n in RenderTree(nd):
+				print("%s%s %s" % (pre, n.name, n.operator))
 
 	def create_tree(self, ts): 
 		'''
@@ -35,7 +39,7 @@ class tf_tree(object):
 		#Node will make node automatically from anytree
 		if ts:
 			self.node_count += 1
-			self.root = Node(self.node_count, data=preprocessing.read(ts))
+			self.root = Node(self.node_count, data=preprocessing.read(ts), operator="")
 			self.current_node = self.root
 			return True
 		else:
@@ -145,20 +149,48 @@ class tf_tree(object):
 			print("Invalid Node")
 			return False
 
-	def load_save_tree(self): 
+	def save_load_tree(self, method, name): 
 		'''
 		Load/Save whole tree. ###Load and save where?
 
 		If we know leaves, we can run tree using path of leaf
 		but im not sure, if this is right way to do
 		'''
-		pass
+		nm = name + ".pickle"
+		if method.lower() == "save":
+			f = open(nm, "wb")
+			dt = copy.deepcopy(self.root)
+			dt.data = self.root.data
+			pickle.dump(dt, f)
+			f.close()
+		elif method.lower() == "load":
+			f = open(nm, "rb")
+			self.root = pickle.load(f)
+			f.close()
+		else:
+			print("Invalid Input")
+			return False
 
-	def load_save_pipeline(self, node):
+	def save_load_pipeline(self, method, node):
 		'''
 		Load/Save a pipeline 
 		'''
-		pass
+		nm = str(node) + ".pickle"
+		if method.lower() == "save":
+			nd = search.find_by_attr(self.root, node)
+			if nd:
+				f = open(nm, "wb")
+				dts = copy.deepcopy(nd.path)
+				dts[0].data = self.root.data
+				pickle.dump(dts, f)
+				f.close()
+		elif method.lower() == "load":
+			f = open(nm, "rb")
+			self.root = pickle.load(f)[0]
+			f.close()
+		else:
+			print("Invalid Input")
+			return False
 
 	def exec_tree(self): 
 		'''
@@ -188,8 +220,8 @@ class tf_tree(object):
 		if node:
 			nd = search.find_by_attr(self.root, node)
 			for pl in nd.path:
-				if not pl.is_root and (pl.operator):
-					pl.data = pl.parent.data
+				if not pl.is_root and pl.operator:
+					pl.data = copy.deepcopy(pl.parent.data)
 					pl.data = operations.pick_operator(pl)
 			return pl.data
 		else:
