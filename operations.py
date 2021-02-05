@@ -30,8 +30,11 @@ def check_operator(node):
 			tvt.append(float(input('Training % : ')))
 			tvt.append(float(input('Valid % : ')))
 			tvt.append(float(input('Test % : ')))
+			if (tvt[0]+tvt[1]+tvt[2]) != 1:
+				print("Invalid Input")
+				return False
 			node.tvt = tvt
-			ly1, ly2, ly3 = input("Enter Layers ly1, ly2, ly3 : ").split()
+			ly1, ly2, ly3 = input("Enter Layers ly1 ly2 ly3 : ").split()
 			node.ly = [int(ly1), int(ly2), int(ly3)]
 
 		elif op == 'create_train':
