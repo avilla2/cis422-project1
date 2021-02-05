@@ -2,6 +2,7 @@ import preprocessing
 import modeling
 import visualization
 import copy
+import operations
 from anytree import Node, RenderTree, search
 '''
 Credit by Jay Shin
@@ -38,6 +39,7 @@ class tf_tree(object):
 			self.current_node = self.root
 			return True
 		else:
+			print("Invalid Data")
 			return False
         
 	def add_operator(self, node, op): 
@@ -56,16 +58,20 @@ class tf_tree(object):
 	            #anytree doesn't allow nodes with same name
 				self.node_count += 1
 				add_node = Node(self.node_count, parent=nd, operator=op)
+				operations.check_operator(add_node)
 				self.current_node = add_node 
 				return True
 		else:
+			print("Invalid Node")
 			return False
 
 	def remove_operator(self, node):
 		if self.root:
 			nd = search.find_by_attr(self.root, node)
 			nd.parent = None
+			return True
 		else:
+			print("Invalid Node")
 			return False
 
 
@@ -81,6 +87,7 @@ class tf_tree(object):
 				nd.children = nd.children
 				return True
 		else:
+			print("Invalid Node")
 			return False
 	        
 	def replicate_subtree(self, node):
@@ -100,6 +107,7 @@ class tf_tree(object):
 			copy_node.parent = None
 			return copy_node
 		else:
+			print("Invalid Node")
 			return False
 
 
@@ -120,6 +128,7 @@ class tf_tree(object):
 			copy_nodes[0].parent = None
 			return copy_nodes
 		else:
+			print("Invalid Node")
 			return False
 
 	def add_subtree(self, node, to_node):
@@ -133,6 +142,7 @@ class tf_tree(object):
 			node.parent = tnd
 			return True
 		else:
+			print("Invalid Node")
 			return False
 
 	def load_save_tree(self): 
@@ -162,8 +172,9 @@ class tf_tree(object):
 		if self.root.leaves:
 			for leaf in self.root.leaves:
 				self.results[int(leaf.name)] = self.exec_pipeline(leaf.name)
-			return self.results
+			return True
 		else:
+			print("No leaves exist")
 			return False
 
 	def exec_pipeline(self, node): 
@@ -179,69 +190,8 @@ class tf_tree(object):
 			for pl in nd.path:
 				if not pl.is_root and (pl.operator):
 					pl.data = pl.parent.data
-					pl.data = self.pick_operator(pl)
-					print("operator : " , pl.operator)
-					print("data : " , pl.data)
+					pl.data = operations.pick_operator(pl)
 			return pl.data
 		else:
+			print("No leaf exists")
 			return False
-
-	def pick_operator(self, node):
-		new_data = {}
-		data = node.data
-		op = node.operator
-		if op == 'denoise': return preprocessing.denoise(data)
-		elif op == 'impute_missing_data': return preprocessing.impute_missing_data(data)
-		elif op == 'impute_outliers': return preprocessing.impute_outliers(data)
-		elif op == 'longest_continous_run': return preprocessing.longest_continuous_run(data)
-		elif op == 'clip': 
-			start = input('Start Date : ')
-			final = input('Final Date : ')
-			return preprocessing.clip(data, start, final)
-		elif op == 'assign_time': 
-			start = input('Start Date : ')
-			inc = input('Increment : ')
-			return preprocessing.assign_time(data, start, inc)
-		elif op == 'difference': return preprocessing.difference(data)
-		elif op == 'scaling': return preprocessing.scaling(data)
-		elif op == 'standardize': return preprocessing.standardize(data)
-		elif op == 'logarithm': return preprocessing.logarithm(data)
-		elif op == 'cubic_root': return preprocessing.cubic_root(data)
-		elif op == 'split_models': 
-			train = float(input('Training % : '))
-			valid = float(input('Valid % : '))
-			test = float(input('Test % : '))
-			data = preprocessing.split_data(data, train, valid, test)
-			ly1, ly2, ly3 = input("Enter Layers ly1, ly2, ly3 : ").split()
-			node.model = modeling.mlp_model((int(ly1),int(ly2),int(ly3)))
-			return data
-		elif op == 'create_train':
-			node.model = node.parent.model
-			dfs = node.data
-			mt = list(map(int, input('Enter mi, ti, mo,to : ').split()))
-			dftype = input('Enter data frame type : ')
-			if dftype.lower() == 'train':
-				train_x, train_y = preprocessing.design_matrix(dfs[0], mt[0], mt[1], mt[2], mt[3])
-			elif dftype.lower() == 'valid':
-				train_x, train_y = preprocessing.design_matrix(dfs[1], mt[0], mt[1], mt[2], mt[3])
-			elif dftype.lower() == 'test':
-				train_x, train_y = preprocessing.design_matrix(dfs[2], mt[0], mt[1], mt[2], mt[3])
-			node.model.fit(train_x, train_y)
-			return dfs, mt
-		elif op == 'forecast': 
-			n = int(input('Enter number of forecasts : '))
-			node.model = node.parent.model
-			dfs = data[0]
-			mt = data[1]
-			ret = preprocessing.forecast_op(n, node.model, dfs[2], mt[0], mt[1], mt[2], mt[3])
-			return ret[1]
-		elif op == 'ts2db': return preprocessing.ts2db(data)
-		elif op == 'plot': 
-			return visualization.plot(data)
-		elif op == 'histogram': return visualization.histogram(data)
-		elif op == 'box_plot': return visualization.box_plot(data)
-		elif op == 'normality_test': return visualization.normality_test(data)
-		elif op == 'mse': return visualization.mse(data)
-		elif op == 'mape': return visualization.mape(data)
-		elif op == 'smape': return visualization.smape(data)
-		else: return False
