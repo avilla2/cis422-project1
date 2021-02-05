@@ -1,4 +1,5 @@
 from sklearn.neural_network import MLPRegressor
+#from statsmodels.tsa.arima.model import ARIMA
 
 
 """
@@ -9,7 +10,7 @@ parameters
 returns
     returns a neural network object
 """
-def mlp_model(layers=(16, 16, 16)):
+def mlp_model(layers):
     return MLPRegressor(hidden_layer_sizes=layers, solver='lbfgs')
 
 
@@ -32,10 +33,10 @@ forecast
     predict using the multi-layer perceptron model (neural network)
 parameters
     nn: neural network
-    x: matrix e.g. [[a1, b1],[a2,b2],...,[an, bn]]
+    x: vector e.g. [a1, a2,...,an]
 returns
     the predicted values for each sublist
 """
 def forecast(nn, x):
-    return nn.predict(x)
-
+    prediction = nn.predict([x])
+    return prediction[0]
