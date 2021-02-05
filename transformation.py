@@ -19,7 +19,6 @@ class tf_tree(object):
 	''' 
 	def __init__(self):
 		self.root = None
-		self.original = None
 		self.current_node = None
 		self.node_count = 0
 		self.results = {}
@@ -41,7 +40,6 @@ class tf_tree(object):
 		if ts:
 			self.node_count += 1
 			self.root = Node(self.node_count, data=preprocessing.read(ts), operator="")
-			self.original = self.root.data.copy()
 			self.current_node = self.root
 			return True
 		else:
@@ -162,7 +160,7 @@ class tf_tree(object):
 		if method.lower() == "save":
 			f = open(nm, "wb")
 			dt = copy.deepcopy(self.root)
-			dt.data = self.original
+			dt.data = self.root.data
 			pickle.dump(dt, f)
 			f.close()
 		elif method.lower() == "load":
@@ -183,7 +181,7 @@ class tf_tree(object):
 			if nd:
 				f = open(nm, "wb")
 				dts = copy.deepcopy(nd.path)
-				dts[0].data = self.original
+				dts[0].data = self.root.data
 				pickle.dump(dts, f)
 				f.close()
 		elif method.lower() == "load":
@@ -222,8 +220,8 @@ class tf_tree(object):
 		if node:
 			nd = search.find_by_attr(self.root, node)
 			for pl in nd.path:
-				if not pl.is_root and (pl.operator):
-					pl.data = pl.parent.data
+				if not pl.is_root and pl.operator:
+					pl.data = copy.deepcopy(pl.parent.data)
 					pl.data = operations.pick_operator(pl)
 			return pl.data
 		else:
