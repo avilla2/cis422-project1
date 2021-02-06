@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from numpy import log10
 from datetime import datetime
 from sklearn.model_selection import train_test_split
@@ -35,11 +36,13 @@ def denoise(ts: pd.DataFrame) -> pd.DataFrame:
     ts.iloc[:, -1:] = ts.iloc[:, -1:].rolling(window=5).mean()
     return ts
 
+
 def _predict_point(ts, value):
     """
     Predict the value of a point using linear regression
     """
-    x_train, x_test, y_train, y_test = train_test_split(ts.iloc[:, -1:], ts.iloc[:, -1:], test_size=0.2, random_state=101)
+    x_train, x_test, y_train, y_test = train_test_split(ts.iloc[:, -1:], ts.iloc[:, -1:], test_size=0.2,
+                                                        random_state=101)
     lm = LinearRegression().fit(x_train, y_train)
     print(value)
     pred = lm.predict(value)
@@ -56,7 +59,6 @@ def impute_missing_data(ts):
     for i in ts.iloc[:, -1:].index:
         if pd.isna(ts.iloc[i, -1:]).bool():
             ts.iloc[i, -1:] = m
-            
 
 
 def impute_outliers(ts):
@@ -88,10 +90,12 @@ def assign_time(ts, start, increment):
     In many cases, we do not have the times associated
     with a sequence of readings. Start and increment represent t0 delta, respectively.
     """
-    length = ts.iloc[:, -1:].size 
-    end = (length * increment) + start 
+    length = ts.iloc[:, -1:].size
+    end = (length * increment) + start
     if "Datetime" not in ts:
-        ts.insert(0, "Datetime", [datetime(2010,1,1, hour=(x//3600), minute=(x//60%60), second=(x%60)) for x in range(start, end, increment)])
+        ts.insert(0, "Datetime",
+                  [datetime(2010, 1, 1, hour=(x // 3600), minute=(x // 60 % 60), second=(x % 60)) for x in
+                   range(start, end, increment)])
     return ts
 
 
@@ -102,6 +106,7 @@ def difference(ts):
     """
     ts.iloc[:, -1:] = ts.iloc[:, -1:].diff()
     return ts
+
 
 def scaling(ts):
     """
@@ -114,6 +119,7 @@ def scaling(ts):
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - floor) / diff)
     return ts
 
+
 def standardize(ts):
     """
     Produces a time series whose mean is 0 and variance is 1.
@@ -122,6 +128,7 @@ def standardize(ts):
     sigma = float(ts.iloc[:, -1:].std())
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - mu) / sigma)
     return ts
+
 
 def logarithm(ts):
     """
@@ -138,6 +145,7 @@ def cubic_root(ts):
     """
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: x ** (1 / 3))
     return ts
+
 
 # Splits the data based on the percents (in decimal notation).
 # Percents must add to 1.0 and training and test percents cannot be 0.0.
@@ -179,10 +187,11 @@ parameters
     ti: distance between test input points (integer)
     mo: number of test output points (integer)
     to: distance between test output points (integer)
-
 returns
     two matrices
 """
+
+
 def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     x, y = df.shape
 
@@ -233,20 +242,70 @@ def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
     pass
 
 
-def forecast_op(n, model, test_df, mi, ti, mo, to):
-    test_matrix_x, test_matrix_y = design_matrix(test_df, mi, ti, mo, to)
-    forecast_array = []
+def forecast_predict(n, model, df, mi, ti, mo, to):
+    test_matrix_x, test_matrix_y = design_matrix(df, mi, ti, mo, to)
+    row, col = df.shape
+    time = df.iloc[row - 1, 0]
+    time_delta = df.iloc[1, 0] - df.iloc[0, 0]
 
+    # if user is doing one step ahead forecasting
+    time_array = [time]
+    forecast_array = [df.iloc[row - 1][col - 1]]
+    input_array = test_matrix_x[-1]
+    if mo == 1:
+        for i in range(n):
+            prediction = model.predict([input_array])[0]
+            forecast_array.append(prediction)
+            input_array.append(prediction)
+            input_array.pop(0)
+            time = time + time_delta
+            time_array.append(time)
+    # if user is doing multiple step simultaneous
+    else:
+        prediction = model.predict([input_array])[0]
+        for i in range(mo):
+            time = time + time_delta
+            time_array.append(time)
+            forecast_array.append(prediction[i])
+
+    column_names = df.columns.values.tolist()
+    forecast_dataframe = pd.DataFrame(list(zip(time_array, forecast_array)), columns=[column_names[0], column_names[1]])
+
+    return forecast_array, forecast_dataframe
+
+
+def forecast_test(n, model, test_df, mi, ti, mo, to):
+    test_matrix_x, test_matrix_y = design_matrix(test_df, mi, ti, mo, to)
+    matrix_len = len(test_matrix_x)
+    forecast_array = []
+    row, col = test_df.shape
+    print(row, col)
     x = mi * ti + to
     time_array = []
-    for j in range(n):
-        array = test_matrix_x[j]
-        prediction = model.predict([array])[0]
-        # print(type(array), array)
-        if type(prediction) == np.ndarray:
-            forecast_array = prediction
-        else:
+    n = min(n, row - x - 1)
+    # if user is doing one step ahead forecasting
+    if mo == 1:
+        test_array = []
+        for i in range(n):
+            array = test_matrix_x[i]
+            prediction = model.predict([array])[0]
             forecast_array.append(prediction)
+            time = test_df.iloc[x, 0]
+            time_array.append(time)
+            x += to
+            # replace old matrix values with newly forecasted values
+            for j in range(mi):
+                array_num = i + to + (ti * j)
+                if array_num < matrix_len - 1:
+                    if j == 0:
+                        test_array.append(test_matrix_x[array_num][mi - j - 1])
+                    test_matrix_x[array_num][mi - j - 1] = prediction
+    # if user is doing multiple step simultaneous
+    else:
+        test_array = test_matrix_y[0]
+        array = test_matrix_x[0]
+        prediction = model.predict([array])[0]
+        forecast_array = prediction
         for i in range(mo):
             time = test_df.iloc[x, 0]
             time_array.append(time)
@@ -255,5 +314,5 @@ def forecast_op(n, model, test_df, mi, ti, mo, to):
     column_names = test_df.columns.values.tolist()
     forecast_dataframe = pd.DataFrame(list(zip(time_array, forecast_array)), columns=[column_names[0], column_names[1]])
 
-    return forecast_array, forecast_dataframe
+    return test_array, forecast_array, forecast_dataframe
 
