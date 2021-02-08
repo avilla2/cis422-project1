@@ -22,7 +22,7 @@ class tf_tree(object):
 		self.current_node = None
 		self.node_count = 0
 		self.results = {}
-        
+
 	def print_tree(self, node):
 		'''
 		using anytree function RenderTree, display tree with node as root
@@ -45,8 +45,8 @@ class tf_tree(object):
 		else:
 			print("Invalid Data")
 			return False
-        
-	def add_operator(self, node, op): 
+
+	def add_operator(self, node, op):
 		'''
 		Add operators to the transformation tree
 		checking type compatibility of output/input of operators. 
@@ -58,12 +58,12 @@ class tf_tree(object):
 		if self.root:
 			nd = search.find_by_attr(self.root, node)
 			if nd and op:
-	            #index is for the numbering purpose
-	            #anytree doesn't allow nodes with same name
+				# index is for the numbering purpose
+				# anytree doesn't allow nodes with same name
 				self.node_count += 1
 				add_node = Node(self.node_count, parent=nd, operator=op)
 				operations.check_operator(add_node)
-				self.current_node = add_node 
+				self.current_node = add_node
 				return True
 		else:
 			print("Invalid Node")
@@ -78,10 +78,9 @@ class tf_tree(object):
 			print("Invalid Node")
 			return False
 
-
 	def replace_process(self, node, op): 
 		'''
-	    This function is to fix node's operator to new one
+		This function is to fix node's operator to new one
 		from preprocesesing
 		'''
 		if self.root:
@@ -93,11 +92,11 @@ class tf_tree(object):
 		else:
 			print("Invalid Node")
 			return False
-	        
+
 	def replicate_subtree(self, node):
 		'''
 		Copy and paste the one node, no following nodes : path below
-		using deepcopy mathod, copy data but separate from original
+		using deepcopy method, copy data but separate from original
 		and return the copied subtree
 		'''
 		if node:
@@ -114,12 +113,11 @@ class tf_tree(object):
 			print("Invalid Node")
 			return False
 
-
 	def replicate_tree_path(self, node):
 		'''
 		Different 
 		Copy and paste the path following the one node : path above
-		using deepcopy mathod, copy data but separate from original
+		using deepcopy method, copy data but separate from original
 		and return the copied path
 		'''
 		if node:

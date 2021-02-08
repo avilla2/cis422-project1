@@ -4,19 +4,22 @@ import visualization
 import copy
 from anytree import Node
 
+
 def get_data(node, op):
 	for pth in reversed(node.path):
-     	#if we iterate backwoard plot node will take processed data before last split
+		# if we iterate backward plot node will take processed data before last split
 		if pth.operator == op:
 			return pth
 
+
 def check_operator(node):
-	operators = [ 'denoise', 'impute_missing_data', 'impute_outliers', 'longest_continous_run',
+	operators = ['denoise', 'impute_missing_data', 'impute_outliers', 'longest_continuous_run',
 					'difference', 'scaling', 'standardize', 'logarithm', 'cubic_root', 'plot', 
 					'histogram', 'box_plot', 'normality_test']
-	if node.operator.lower() not in operators:
+	if node.operator.lower() in operators:
+		return True
+	elif node.operator.lower() not in operators:
 		op = node.operator
-
 		if op == 'clip': 
 			node.start = input('Start Date : ')
 			node.final = input('Final Date : ')
@@ -34,14 +37,19 @@ def check_operator(node):
 				print("Invalid Input")
 				return False
 			node.tvt = tvt
-			ly1, ly2, ly3 = input("Enter Layers ly1 ly2 ly3 : ").split()
-			node.ly = [int(ly1), int(ly2), int(ly3)]
+			layers = input("Enter Layers ly1 ly2 ly3 : ").split()
+			node.ly = []
+			for layer in layers:
+				for l in layer:
+					if l == ',':
+						layer.replace(l, "")
+				node.ly.append(layer)
 
 		elif op == 'create_train':
 			numbers = []
 			numbers.append(int(input('Enter number of inputs (mi): ')))
 			numbers.append(int(input('Enter number of input spacing (ti): ')))
-			numbers.append(int(input('Enter number of outputs : (mo)')))
+			numbers.append(int(input('Enter number of outputs (mo): ')))
 			numbers.append(int(input('Enter number of output spacing (to): ')))
 			node.mt = numbers
 
@@ -58,11 +66,10 @@ def check_operator(node):
 			pass
 		elif op == 'smape': 
 			pass
-	elif node.operator.lower() in operators:
-		return True
-	else:
-		print("Invalid Operator")
-		return False
+		else:
+			print("Invalid Operator")
+			return False
+
 
 def pick_operator(node):
 	data = node.data
@@ -70,7 +77,7 @@ def pick_operator(node):
 	if op == 'denoise': return preprocessing.denoise(data)
 	elif op == 'impute_missing_data': return preprocessing.impute_missing_data(data)
 	elif op == 'impute_outliers': return preprocessing.impute_outliers(data)
-	elif op == 'longest_continous_run': return preprocessing.longest_continuous_run(data)
+	elif op == 'longest_continuous_run': return preprocessing.longest_continuous_run(data)
 	elif op == 'clip': 
 		return preprocessing.clip(data, node.start, node.final)
 	elif op == 'assign_time': 
@@ -83,7 +90,7 @@ def pick_operator(node):
 	elif op == 'split_models':
 		node.prc_data = data
 		data = preprocessing.split_data(data, node.tvt[0], node.tvt[1], node.tvt[2])
-		node.model = modeling.mlp_model((node.ly[0], node.ly[0], node.ly[0]))
+		node.model = modeling.mlp_model((node.ly[0], node.ly[1], node.ly[2]))
 		return data
 	elif op == 'create_train':
 		node.model = node.parent.model
@@ -102,8 +109,8 @@ def pick_operator(node):
 			print("Invalid Type")
 			return False
 		mts = get_data(node, 'create_train')
-		mts = mts.mt 
-		return preprocessing.forecast_op(node.n, node.model, df, mts[0], mts[1], mts[2], mts[3])
+		mts = mts.mt
+		return preprocessing.forecast_predict(node.n, node.model, df, mts[0], mts[1], mts[2], mts[3])
 	elif op == 'ts2db': return preprocessing.ts2db(data)
 	elif op == 'plot':
 		if type(data) is tuple:
