@@ -37,13 +37,13 @@ def check_operator(node):
 				print("Invalid Input")
 				return False
 			node.tvt = tvt
-			layers = input("Enter Layers ly1 ly2 ly3 : ").split()
+			layers = input("Enter layer sizes l1 l2 ... ln : ").split()
 			node.ly = []
 			for layer in layers:
 				for l in layer:
 					if l == ',':
 						layer.replace(l, "")
-				node.ly.append(layer)
+				node.ly.append(int(layer))
 
 		elif op == 'create_train':
 			numbers = []
@@ -90,6 +90,7 @@ def pick_operator(node):
 	elif op == 'split_models':
 		node.prc_data = data
 		data = preprocessing.split_data(data, node.tvt[0], node.tvt[1], node.tvt[2])
+		# TODO fix to allow for different numbers of layers
 		node.model = modeling.mlp_model((node.ly[0], node.ly[1], node.ly[2]))
 		return data
 	elif op == 'create_train':
@@ -98,7 +99,23 @@ def pick_operator(node):
 		train_x, train_y = preprocessing.design_matrix(traindf, node.mt[0], node.mt[1], node.mt[2], node.mt[3])
 		node.model.fit(train_x, train_y)
 		return data
-	elif op == 'forecast': 
+	# TODO this function returns test_array, forecast_array, and forecast_dataframe
+	# TODO test_array and forecast_array are used in the error functions
+	elif op == 'test_forecast':
+		node.model = node.parent.model
+		df = data[0]
+		if node.pick.lower() == 'valid':
+			df = data[1]
+		elif node.pick.lower() == 'test':
+			df = data[2]
+		else:
+			print("Invalid Type")
+			return False
+		mts = get_data(node, 'create_train')
+		mts = mts.mt
+		return preprocessing.forecast_test(node.n, node.model, df, mts[0], mts[1], mts[2], mts[3])
+	# TODO change this forecast to always use the original dataframe (not test or valid)
+	elif op == 'forecast':
 		node.model = node.parent.model
 		df = data[0]
 		if node.pick.lower() == 'valid':
@@ -113,11 +130,13 @@ def pick_operator(node):
 		return preprocessing.forecast_predict(node.n, node.model, df, mts[0], mts[1], mts[2], mts[3])
 	elif op == 'ts2db': return preprocessing.ts2db(data)
 	elif op == 'plot':
+		time_series = data
 		if type(data) is tuple:
 			processed = get_data(node, 'split_models')
 			processed = processed.prc_data
 			data = [processed, data[1]]
-		return visualization.plot(data)
+		visualization.plot(data)
+		return time_series
 	elif op == 'histogram': return visualization.histogram(data)
 	elif op == 'box_plot': return visualization.box_plot(data)
 	elif op == 'normality_test': return visualization.normality_test(data)
