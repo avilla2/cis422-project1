@@ -7,17 +7,20 @@ import pickle
 from anytree import Node, RenderTree, search
 '''
 Credit by Jay Shin
-anytree is a great tree library. I believe 
-using this library will save us a lot of time
+anytree is a great tree library.
+anytree creates root and nodes for us
 '''
 
 class tf_tree(object): 
 	'''
 	This is TransFormation tree
-	NodeMixin is a feature in anytree library
-	NodeMixin will add node feature to our functions
+	preDicTable creates tree with this
 	''' 
 	def __init__(self):
+		'''
+		Initializing the tree. It creates empty tree.
+		node_count is for unique naming
+		'''
 		self.root = None
 		self.current_node = None
 		self.node_count = 0
@@ -25,7 +28,7 @@ class tf_tree(object):
 
 	def print_tree(self, node):
 		'''
-		using anytree function RenderTree, display tree with node as root
+		using anytree function RenderTree, display tree with node number and operator
 		'''
 		nd = search.find_by_attr(self.root, node)
 		if nd:
@@ -34,9 +37,9 @@ class tf_tree(object):
 
 	def create_tree(self, ts): 
 		'''
-		Create a new tree : initialize tree
+		Set the begining of tree. Root is always 1.
+		takes time series data address and read from prerocessing
 		'''
-		#Node will make node automatically from anytree
 		if ts:
 			self.node_count += 1
 			self.root = Node(self.node_count, data=preprocessing.read(ts), operator="Time Series Data")
@@ -50,10 +53,6 @@ class tf_tree(object):
 		'''
 		Add operators to the transformation tree
 		checking type compatibility of output/input of operators. 
-		No operateTree means it's Default condition
-		
-		We need to get function from user which will be choices
-		Easist way to handle cornercases
 		'''
 		if self.root:
 			nd = search.find_by_attr(self.root, node)
@@ -70,6 +69,9 @@ class tf_tree(object):
 			return False
 
 	def remove_operator(self, node):
+		'''
+		Remove input node. Node and its related data will be removed(children)
+		'''
 		if self.root:
 			nd = search.find_by_attr(self.root, node)
 			nd.parent = None
@@ -87,6 +89,7 @@ class tf_tree(object):
 			nd = search.find_by_attr(self.root, node)
 			if op and nd:
 				nd.operator = op
+				n
 				nd.children = nd.children
 				return True
 		else:
@@ -95,9 +98,8 @@ class tf_tree(object):
 
 	def replicate_subtree(self, node):
 		'''
-		Copy and paste the one node, no following nodes : path below
-		using deepcopy method, copy data but separate from original
-		and return the copied subtree
+		Find subtree of input node.
+		It returns copied subtree
 		'''
 		if node:
 			nd = search.find_by_attr(self.root, node)
@@ -115,10 +117,8 @@ class tf_tree(object):
 
 	def replicate_tree_path(self, node):
 		'''
-		Different 
-		Copy and paste the path following the one node : path above
-		using deepcopy method, copy data but separate from original
-		and return the copied path
+		Find path of input node.
+		It returns copied path
 		'''
 		if node:
 			nd = search.find_by_attr(self.root, node)
@@ -135,9 +135,8 @@ class tf_tree(object):
 
 	def add_subtree(self, node, to_node):
 		'''
-		Add a subtree to a node. 
-		Add path to input node children list
-		Make this node a sibling of current node
+		Add input subtree of path to to_node. 
+		to_node add one child
 		'''
 		if node and to_node:
 			tnd = search.find_by_attr(self.root, to_node)
@@ -149,10 +148,8 @@ class tf_tree(object):
 
 	def save_load_tree(self, method, name): 
 		'''
-		Load/Save whole tree. ###Load and save where?
-
-		If we know leaves, we can run tree using path of leaf
-		but im not sure, if this is right way to do
+		Load/Save whole tree
+		pickle module assists this function
 		'''
 		nm = name + ".pickle"
 		if method.lower() == "save":
@@ -172,6 +169,7 @@ class tf_tree(object):
 	def save_load_pipeline(self, method, node):
 		'''
 		Load/Save a pipeline 
+		pickle module assists this function
 		'''
 		nm = str(node) + ".pickle"
 		if method.lower() == "save":
@@ -193,11 +191,8 @@ class tf_tree(object):
 	def exec_tree(self): 
 		'''
 		Execute whole tree.
-		If tree is in default, use default for ML
-		if tree has pipeline, wait until they are all done
-		
-		Contains modeling and forecasting functions
-		then result present
+		It goes each leaf and run assigened operator from its path
+		This saves result data in its result dictionary
 		'''
 		if self.root.leaves:
 			for leaf in self.root.leaves:
@@ -210,10 +205,8 @@ class tf_tree(object):
 	def exec_pipeline(self, node): 
 		'''
 		Execute a pipeline.
-		If pipeline exists, run all
-
-		Contains modeling and forecasting functions
-		return all the results
+		It goes down to input leaf and run assigened operator from its path
+		This saves result data in its result dictionary
 		'''
 		if node:
 			nd = search.find_by_attr(self.root, node)
