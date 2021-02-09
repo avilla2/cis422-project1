@@ -4,6 +4,7 @@ from numpy import log10
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import NearestNeighbors
 
 """
 parameters
@@ -37,6 +38,7 @@ def denoise(ts: pd.DataFrame) -> pd.DataFrame:
     return ts
 
 
+'''
 def _predict_point(ts, value):
     """
     Predict the value of a point using linear regression
@@ -47,6 +49,7 @@ def _predict_point(ts, value):
     print(value)
     pred = lm.predict(value)
     return pred
+'''
 
 
 def impute_missing_data(ts):
@@ -59,6 +62,7 @@ def impute_missing_data(ts):
     for i in ts.iloc[:, -1:].index:
         if pd.isna(ts.iloc[i, -1:]).bool():
             ts.iloc[i, -1:] = m
+    return ts
 
 
 def impute_outliers(ts):
@@ -67,7 +71,8 @@ def impute_outliers(ts):
     same procedure as for missing data (sklearn implements outlier detection.) This function is better
     applied using the higher dimensional data produced by TS2DB (see below.)
     """
-    pass
+    outliers = NearestNeighbors(n_neighbors=20)
+    outliers.fit(ts.iloc[:, -1:])
 
 
 def longest_continuous_run(ts):
@@ -315,4 +320,3 @@ def forecast_test(n, model, test_df, mi, ti, mo, to):
     forecast_dataframe = pd.DataFrame(list(zip(time_array, forecast_array)), columns=[column_names[0], column_names[1]])
 
     return test_array, forecast_array, forecast_dataframe
-

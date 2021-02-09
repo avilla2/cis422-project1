@@ -39,7 +39,7 @@ class tf_tree(object):
 		#Node will make node automatically from anytree
 		if ts:
 			self.node_count += 1
-			self.root = Node(self.node_count, data=preprocessing.read(ts), operator="")
+			self.root = Node(self.node_count, data=preprocessing.read(ts), operator="Time Series Data")
 			self.current_node = self.root
 			return True
 		else:
