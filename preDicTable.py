@@ -10,7 +10,7 @@ if __name__ == "__main__":
 	while tree:
 		#Providing User Options
 		print('''
-			Select Transformation Number
+			Transformation Number
 			0 : Quit
 			1 : Add
 			2 : Remove Operator
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 		print("Current Tree")
 		tree.print_tree(1)
 
-		choice = int(input("\nEnter Number : "))
+		choice = int(input("\nSelect Transformation Number : "))
 
 		#Exit the program
 		if choice == 0:
