@@ -42,7 +42,9 @@ class tf_tree(object):
 		'''
 		if ts:
 			self.node_count += 1
-			self.root = Node(self.node_count, data=preprocessing.read(ts), operator="Time Series Data")
+			df = preprocessing.read(ts)  # time series dataframe
+			cdf = copy.deepcopy(df)  # preprocessed time series
+			self.root = Node(self.node_count, data={'ts': df, 'ts_clean': cdf, 'graphs': [df]}, operator="Time Series Data")
 			self.current_node = self.root
 			return True
 		else:
