@@ -4,8 +4,18 @@ import visualization
 import copy
 from anytree import Node
 
+'''
+Credit by Adam.C and Jay.S
+Main stream of tree
+This rules the tree evolution
+'''
 
 def get_data(node, op):
+	'''
+	only Operation module uses this function
+	It simply gets data from 
+	earliest apperaing input operator from input node path
+	'''
 	for pth in reversed(node.path):
 		# if we iterate backward plot node will take processed data before last split
 		if pth.operator == op:
@@ -13,6 +23,10 @@ def get_data(node, op):
 
 
 def check_operator(node):
+	'''
+	It simply checks whether operators need variables or not.
+	If operator needs variables, then it will ask the user
+	'''
 	operators = ['denoise', 'impute_missing_data', 'impute_outliers', 'longest_continuous_run',
 					'difference', 'scaling', 'standardize', 'logarithm', 'cubic_root', 'plot', 
 					'histogram', 'box_plot', 'normality_test']
@@ -72,6 +86,10 @@ def check_operator(node):
 
 
 def pick_operator(node):
+	'''
+	This calls functions from different modules
+	Easier to set whole rules for the program
+	'''
 	data = node.data
 	op = node.operator
 	if op == 'denoise': return preprocessing.denoise(data)
