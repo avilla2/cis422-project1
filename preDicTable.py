@@ -1,5 +1,10 @@
 import transformation
-
+'''
+credit by Alex.V and Jay.S
+This is main module that users are going to deal with
+Siply running transformation module for users
+Easier UI module for users
+'''
 
 def print_options():
     print(
@@ -12,6 +17,10 @@ def print_options():
 # This is the begging of tree
 # preDicTable will offer users functionality'
 if __name__ == "__main__":
+    '''
+    This first initializing tree
+    Repeats asking functions until users quit
+    '''
     # Initiating tree with user's Time Series
     tree = transformation.tf_tree()
     valid = False
