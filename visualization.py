@@ -92,7 +92,8 @@ def smape(y_test, y_forecast):
     Computes the SMAPE error of two time series
     """
     smape = []
-    smape.append(1/len(y_test) * np.sum(2 * np.abs(y_forecast[i] - y_test[i]) / (np.abs(y_test[i]) +
+    for i in range(len(y_test)):
+        smape.append(1/len(y_test) * np.sum(2 * np.abs(y_forecast[i] - y_test[i]) / (np.abs(y_test[i]) +
                                                                                  np.abs(y_forecast[i])) * 100))
     return smape
 
