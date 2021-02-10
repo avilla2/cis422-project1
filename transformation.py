@@ -91,7 +91,6 @@ class tf_tree(object):
 			nd = search.find_by_attr(self.root, node)
 			if op and nd:
 				nd.operator = op
-				n
 				nd.children = nd.children
 				return True
 		else:
