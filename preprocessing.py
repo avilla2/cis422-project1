@@ -1,6 +1,10 @@
 import pandas as pd
-from numpy import log10
 import numpy as np
+from numpy import log10
+from datetime import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import NearestNeighbors
 
 """
 parameters
@@ -23,7 +27,7 @@ def read(filename):
     return df
 
 
-def denoise(ts: pd.DataFrame) -> None:
+def denoise(ts: pd.DataFrame) -> pd.DataFrame:
     """
     Removes noise from a time series. Produces a time series with less noise than
     the original one. This function can be implemented using moving (or rolling) media or median
@@ -34,64 +38,91 @@ def denoise(ts: pd.DataFrame) -> None:
     return ts
 
 
+'''
+def _predict_point(ts, value):
+    """
+    Predict the value of a point using linear regression
+    """
+    x_train, x_test, y_train, y_test = train_test_split(ts.iloc[:, -1:], ts.iloc[:, -1:], test_size=0.2,
+                                                        random_state=101)
+    lm = LinearRegression().fit(x_train, y_train)
+    print(value)
+    pred = lm.predict(value)
+    return pred
+'''
+
+
 def impute_missing_data(ts):
     """
     Missing data are often encoded as blanks, NaNs, or other
     placeholders. At this point, let us assume that a single point is missing, and it can be computed
     from its adjacent points in time.
     """
-    pass
+    m = float(ts.iloc[:, -1:].mean())
+    for i in ts.iloc[:, -1:].index:
+        if pd.isna(ts.iloc[i, -1:]).bool():
+            ts.iloc[i, -1:] = m
+    return ts
 
 
 def impute_outliers(ts):
-    '''
+    """
     – Outliers are disparate data that we can treat as missing data. Use the
     same procedure as for missing data (sklearn implements outlier detection.) This function is better
     applied using the higher dimensional data produced by TS2DB (see below.)
-    '''
-    pass
+    """
+    outliers = NearestNeighbors(n_neighbors=20)
+    outliers.fit(ts.iloc[:, -1:])
 
 
 def longest_continuous_run(ts):
-    '''
+    """
     – Isolates the most extended portion of the time series without
     missing data. It returns a time series.
-    '''
+    """
     pass
 
 
 def clip(ts, starting_date, final_date):
-    '''
+    """
     clips the time series to the specified period’s data.
-    '''
-    pass
+    """
+    return ts.iloc[starting_date:final_date, -1:]
 
 
 def assign_time(ts, start, increment):
-    '''
+    """
     In many cases, we do not have the times associated
     with a sequence of readings. Start and increment represent t0 delta, respectively.
-    '''
-    pass
+    """
+    length = ts.iloc[:, -1:].size
+    end = (length * increment) + start
+    if "Datetime" not in ts:
+        ts.insert(0, "Datetime",
+                  [datetime(2010, 1, 1, hour=(x // 3600), minute=(x // 60 % 60), second=(x % 60)) for x in
+                   range(start, end, increment)])
+    return ts
 
 
 def difference(ts):
-    '''
+    """
     Produces a time series whose magnitudes are the differences between
     consecutive elements in the original time series.
-    '''
-    pass
+    """
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].diff()
+    return ts
 
 
 def scaling(ts):
-    '''
+    """
     Produces a time series whose magnitudes are scaled so that the resulting
     magnitudes range in the interval [0,1].
-    '''
+    """
     floor = float(ts.iloc[:, -1:].min())
     ceiling = float(ts.iloc[:, -1:].max())
     diff = ceiling - floor  # range
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - floor) / diff)
+    return ts
 
 
 def standardize(ts):
@@ -101,6 +132,7 @@ def standardize(ts):
     mu = float(ts.iloc[:, -1:].mean())
     sigma = float(ts.iloc[:, -1:].std())
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: (x - mu) / sigma)
+    return ts
 
 
 def logarithm(ts):
@@ -117,6 +149,7 @@ def cubic_root(ts):
     Produces a time series whose elements are the original elements’ cubic root
     """
     ts.iloc[:, -1:] = ts.iloc[:, -1:].apply(lambda x: x ** (1 / 3))
+    return ts
 
 
 # Splits the data based on the percents (in decimal notation).
@@ -159,10 +192,10 @@ parameters
     ti: distance between test input points (integer)
     mo: number of test output points (integer)
     to: distance between test output points (integer)
-
 returns
     two matrices
 """
+
 
 def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     x, y = df.shape
@@ -172,33 +205,35 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     for i in range(mi):
         tail = i * ti
         input_array.append(tail)
-        #tail += 1
     output_array = []
     for i in range(mo + 1):
         if i == 0:
             continue
         output_array.append(i * to + tail)
 
-    # print(input_array, output_array)
-    # print(df.iloc[input_array])
-    # print(df.iloc[output_array])
-
     input_matrix = []
     output_matrix = []
-    while output_array[-1] < x:
-        i_frames = []
-        o_frames = []
-        for i in input_array:
-            i_frames.append(df.iloc[i, 1])
-        for i in output_array:
-            o_frames.append(df.iloc[i, 1])
-        input_matrix.append(i_frames)
-        output_matrix.append(o_frames)
-        input_array = [x + 1 for x in input_array]
-        output_array = [x + 1 for x in output_array]
-
-    # print(input_matrix)
-    # print(output_matrix)
+    if mo == 1:
+        while output_array[-1] < x:
+            i_frames = []
+            for i in input_array:
+                i_frames.append(df.iloc[i, 1])
+            input_matrix.append(i_frames)
+            output_matrix.append(df.iloc[output_array[0], 1])
+            input_array = [x + 1 for x in input_array]
+            output_array = [x + 1 for x in output_array]
+    else:
+        while output_array[-1] < x:
+            i_frames = []
+            o_frames = []
+            for i in input_array:
+                i_frames.append(df.iloc[i, 1])
+            for i in output_array:
+                o_frames.append(df.iloc[i, 1])
+            input_matrix.append(i_frames)
+            output_matrix.append(o_frames)
+            input_array = [x + 1 for x in input_array]
+            output_array = [x + 1 for x in output_array]
 
     return input_matrix, output_matrix
 
@@ -212,20 +247,70 @@ def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
     pass
 
 
-def forecast(n, model, test_df, mi, ti, mo, to):
-    test_matrix_x, test_matrix_y = design_matrix(test_df, mi, ti, mo, to)
-    forecast_array = []
+def forecast_predict(n, model, df, mi, ti, mo, to):
+    test_matrix_x, test_matrix_y = design_matrix(df, mi, ti, mo, to)
+    row, col = df.shape
+    time = df.iloc[row - 1, 0]
+    time_delta = df.iloc[1, 0] - df.iloc[0, 0]
 
+    # if user is doing one step ahead forecasting
+    time_array = [time]
+    forecast_array = [df.iloc[row - 1][col - 1]]
+    input_array = test_matrix_x[-1]
+    if mo == 1:
+        for i in range(n):
+            prediction = model.predict([input_array])[0]
+            forecast_array.append(prediction)
+            input_array.append(prediction)
+            input_array.pop(0)
+            time = time + time_delta
+            time_array.append(time)
+    # if user is doing multiple step simultaneous
+    else:
+        prediction = model.predict([input_array])[0]
+        for i in range(mo):
+            time = time + time_delta
+            time_array.append(time)
+            forecast_array.append(prediction[i])
+
+    column_names = df.columns.values.tolist()
+    forecast_dataframe = pd.DataFrame(list(zip(time_array, forecast_array)), columns=[column_names[0], column_names[1]])
+
+    return forecast_array, forecast_dataframe
+
+
+def forecast_test(n, model, test_df, mi, ti, mo, to):
+    test_matrix_x, test_matrix_y = design_matrix(test_df, mi, ti, mo, to)
+    matrix_len = len(test_matrix_x)
+    forecast_array = []
+    row, col = test_df.shape
+    #print(row, col)
     x = mi * ti + to
     time_array = []
-    for j in range(n):
-        array = test_matrix_x[j]
-        prediction = model.predict([array])[0]
-        # print(type(array), array)
-        if type(prediction) == np.ndarray:
-            forecast_array = prediction
-        else:
+    n = min(n, row - x - 1)
+    # if user is doing one step ahead forecasting
+    if mo == 1:
+        test_array = []
+        for i in range(n):
+            array = test_matrix_x[i]
+            prediction = model.predict([array])[0]
             forecast_array.append(prediction)
+            time = test_df.iloc[x, 0]
+            time_array.append(time)
+            x += to
+            # replace old matrix values with newly forecasted values
+            for j in range(mi):
+                array_num = i + to + (ti * j)
+                if array_num < matrix_len - 1:
+                    if j == 0:
+                        test_array.append(test_matrix_x[array_num][mi - j - 1])
+                    test_matrix_x[array_num][mi - j - 1] = prediction
+    # if user is doing multiple step simultaneous
+    else:
+        test_array = test_matrix_y[0]
+        array = test_matrix_x[0]
+        prediction = model.predict([array])[0]
+        forecast_array = prediction
         for i in range(mo):
             time = test_df.iloc[x, 0]
             time_array.append(time)
@@ -234,5 +319,4 @@ def forecast(n, model, test_df, mi, ti, mo, to):
     column_names = test_df.columns.values.tolist()
     forecast_dataframe = pd.DataFrame(list(zip(time_array, forecast_array)), columns=[column_names[0], column_names[1]])
 
-    return forecast_array, forecast_dataframe
-
+    return test_array, forecast_array, forecast_dataframe

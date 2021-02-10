@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> d3fc0ce1868d17cd85b60ac1057713b8b1f5d5f0
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -14,9 +9,16 @@ def plot(ts):
     :return: No return(?)
     Displays data according to their time indices
     """
-    new_df = ts.set_index('Datetime')
-    new_df.plot()
-    plt.show()
+    if type(ts) == list:
+        ax = None
+        for t in ts:
+            new_df1 = t.set_index('Datetime')
+            ax = new_df1.plot(ax=ax)
+        plt.show()
+    else:
+        new_df = ts.set_index('Datetime')
+        new_df.plot()
+        plt.show()
 
 
 def histogram(ts):
@@ -42,7 +44,7 @@ def box_plot(ts):
     new_df = ts.set_index("DateTime")
     new_df.boxplot()
     plt.show()
-
+    return ts
 
 def normality_test(ts):
     """
