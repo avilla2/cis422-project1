@@ -27,9 +27,7 @@ if __name__ == "__main__":
     valid = int(input("0 : New\t\t1 : Load\n"))
     if valid:
         nm = input("Enter name of file : ")
-        if not tree.save_load_tree("load", nm):
-            print("Invalid Input")
-            pass
+        tree.save_load_tree("load", nm)
     else:
         while not valid:
             try:
@@ -143,7 +141,7 @@ if __name__ == "__main__":
                 elif sl_type == 1:
                     tree.save_load_pipeline("load", nm)
             else:
-                print("Invalid Input")
+                print("1Invalid Input")
                 pass
 
         else:
