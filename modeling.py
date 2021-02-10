@@ -18,7 +18,8 @@ def mlp_model(layers):
     :return
         returns a neural network object
     """
-    return MLPRegressor(hidden_layer_sizes=layers, solver='lbfgs')
+    return MLPRegressor(hidden_layer_sizes=layers)
+    # solver='lbfgs'
 
 
 def learn(nn, x_train, y_train):

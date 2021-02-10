@@ -293,7 +293,7 @@ def forecast_test(n, model, test_df, mi, ti, mo, to):
     matrix_len = len(test_matrix_x)
     forecast_array = []
     row, col = test_df.shape
-    print(row, col)
+    #print(row, col)
     x = mi * ti + to
     time_array = []
     n = min(n, row - x - 1)
