@@ -88,6 +88,13 @@ if __name__ == "__main__":
                     if not tree.add_subtree(tree.replicate_subtree(cnode), pnode):
                         print("Invalid Input")
                         pass
+                else:
+                    print("Invalid Input")
+                    pass
+            else:
+                print("Invalid Input")
+                pass
+
         # Asking for variable to remove node
         elif choice == 2:
             node = int(input("\nEnter Node Number : "))
@@ -116,6 +123,9 @@ if __name__ == "__main__":
                 if not tree.exec_pipeline(node):
                     print("Invalid Input")
                     pass
+            else:
+                print("Invalid Input")
+                pass
 
         # Adding Options to save_load funtions from transformation module
         elif choice == 5:
@@ -131,6 +141,9 @@ if __name__ == "__main__":
                     if not tree.save_load_pipeline("save", nm):
                         print("Invalid Input")
                         pass
+                else:
+                    print("Invalid Input")
+                    pass
             elif sl == 1:
                 if sl_type == 0:
                     if not tree.save_load_tree("load", nm):
@@ -140,6 +153,12 @@ if __name__ == "__main__":
                     if not tree.save_load_pipeline("load", nm):
                         print("Invalid Input")
                         pass
+                else:
+                    print("Invalid Input")
+                    pass
+            else:
+                print("Invalid Input")
+                pass
 
         else:
             print("Invalid Input")
