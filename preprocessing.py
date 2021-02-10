@@ -1,10 +1,7 @@
 import pandas as pd
-import numpy as np
 from numpy import log10
 from datetime import datetime
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import LocalOutlierFactor
 
 """
 parameters
@@ -38,18 +35,13 @@ def denoise(ts: pd.DataFrame) -> pd.DataFrame:
     return ts
 
 
-'''
+
 def _predict_point(ts, value):
     """
     Predict the value of a point using linear regression
     """
-    x_train, x_test, y_train, y_test = train_test_split(ts.iloc[:, -1:], ts.iloc[:, -1:], test_size=0.2,
-                                                        random_state=101)
-    lm = LinearRegression().fit(x_train, y_train)
-    print(value)
-    pred = lm.predict(value)
-    return pred
-'''
+    pass
+
 
 
 def impute_missing_data(ts):
@@ -58,10 +50,8 @@ def impute_missing_data(ts):
     placeholders. At this point, let us assume that a single point is missing, and it can be computed
     from its adjacent points in time.
     """
-    m = float(ts.iloc[:, -1:].mean())
-    for i in ts.iloc[:, -1:].index:
-        if pd.isna(ts.iloc[i, -1:]).bool():
-            ts.iloc[i, -1:] = m
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].fillna(method="bfill")
+    ts.iloc[:, -1:] = ts.iloc[:, -1:].fillna(method="pad")
     return ts
 
 
@@ -71,8 +61,10 @@ def impute_outliers(ts):
     same procedure as for missing data (sklearn implements outlier detection.) This function is better
     applied using the higher dimensional data produced by TS2DB (see below.)
     """
-    outliers = NearestNeighbors(n_neighbors=20)
-    outliers.fit(ts.iloc[:, -1:])
+    clf = LocalOutlierFactor(n_neighbors=20, contamination=0.1)
+    clf.fit_predict(ts.iloc[:, -1:])
+    scores = clf.negative_outlier_factor_
+    return scores
 
 
 def longest_continuous_run(ts):
@@ -80,8 +72,25 @@ def longest_continuous_run(ts):
     – Isolates the most extended portion of the time series without
     missing data. It returns a time series.
     """
-    pass
-
+    start = 0
+    ts_len = len(ts)
+    ending = ts_len
+    cnt = 0
+    ts_max = 0
+    first = 1
+    na_find = ts.iloc[:, -1:].isna()
+    for i in range(ts_len):
+        if na_find.iloc[i, :].bool() == False and first == 1 and cnt > ts_max:
+            start = i
+            first = 0
+        if na_find.iloc[i, :].bool() == False and first == 0 and cnt > ts_max:
+            cnt += 1
+        if na_find.iloc[i, :].bool() == True:
+            ending = i
+            first = 1
+    if cnt > ts_max:
+        ending = ts_len + 1
+    return ts.iloc[start:ending, :]
 
 def clip(ts, starting_date, final_date):
     """
@@ -90,7 +99,7 @@ def clip(ts, starting_date, final_date):
     return ts.iloc[starting_date:final_date, -1:]
 
 
-def assign_time(ts, start, increment):
+def assign_time(ts: pd.DataFrame, start: int, increment: int) -> pd.DataFrame:
     """
     In many cases, we do not have the times associated
     with a sequence of readings. Start and increment represent t0 delta, respectively.
