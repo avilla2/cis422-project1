@@ -151,7 +151,7 @@ def pick_operator(node):
         mts = mts.mt
         test_a, fcast_a, fcast_df = preprocessing.forecast_test(node.n, model, df, mts[0], mts[1], mts[2], mts[3])
         data['test_array'] = test_a
-        data['forecast_array'] = fcast_a
+        data['test_forecast'] = fcast_a
         data['forecast_test'] = fcast_df
         return data
     elif op == 'forecast':
@@ -187,11 +187,11 @@ def pick_operator(node):
         visualization.normality_test(data['ts'])
         return data
     elif op == 'mse':
-        print("MSE:", visualization.mse(data['test_array'], data['forecast_array']))
+        print("MSE:", visualization.mse(data['test_array'], data['test_forecast']))
         return data
     elif op == 'mape':
-        print("MAPE:", visualization.mape(data['test_array'], data['forecast_array']))
+        print("MAPE:", visualization.mape(data['test_array'], data['test_forecast']))
         return data
     elif op == 'smape':
-        print("SMAPE:", visualization.smape(data['test_array'], data['forecast_array']))
+        print("SMAPE:", visualization.smape(data['test_array'], data['test_forecast']))
         return data
