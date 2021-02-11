@@ -6,7 +6,7 @@ from scipy import stats
 def plot(ts):
     """
     :param ts: Time series data
-    :return: No return(?)
+    :return: No return - plots graph
     Displays data according to their time indices
     """
     if type(ts) == list:
@@ -24,7 +24,7 @@ def plot(ts):
 def histogram(ts):
     """
     :param ts: Time series data
-    :return: No return(?)
+    :return: No return - plots graph
     Computes and Draws histogram of given TS
     Plots histogram vertically and side to side
     with a plot of the TS
@@ -37,19 +37,19 @@ def histogram(ts):
 def box_plot(ts):
     """
     :param ts: Time series data
-    :return: no return(?)
+    :return: no return - plots graph
     Produces a Box and Whiskers plot of TS
     Prints 5-number summary of the data
     """
     new_df = ts.set_index("DateTime")
     new_df.boxplot()
     plt.show()
-    return ts
+
 
 def normality_test(ts):
     """
     :param ts: Time series data
-    :return: TS(?)
+    :return: normality of data
     Performs a hypothesis test about normality on the
     time series data distribution
     """
