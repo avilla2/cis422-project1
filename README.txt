@@ -35,7 +35,7 @@ preDicTable will ask the user to enter ‘0’ to create a new tree or ‘1’ t
 If ‘0’ is selected, a tree will be initialized after the user enters the file path for the .csv file
 NOTE: csv file header should be 1 row in length, and contain no more rows than the data itself.
 
-#Once the user has a tree, they will be given actions that can be used by entering their respective number:
+-Once the user has a tree, they will be given actions that can be used by entering their respective number:
 0: Quit - quits the program
 1: Add - add an operator (see below), or a subtree
 2: Remove Operator - removes an operator and all its children
@@ -43,7 +43,7 @@ NOTE: csv file header should be 1 row in length, and contain no more rows than t
 4: Execute - executes a pipeline or a tree
 5: Save/Load - save or load a tree
 
-#Operators you can add:
+-Operators you can add:
 split_models: splits the time series into 3 sets, and creates a neural network model.
 create_train: creates matrices from the training set and trains the model.
 test_forecast: creates a forecast with the model on the test set
@@ -64,10 +64,16 @@ Result
 ---------
 Users must add a visualization node to visualize the result. Because preDicTable is still a beta, its forecast may not be accurate.
   
+  
+  
 
 Revision History
-Date     	Author	Description
-————————————————————————————
-2-8-2021	Jay Shin	v1.0.0 - Initializing README
-2-9-2021	Jay Shin		v2.0.0 - Descript general information of program
-2-10-2021	Adam C		v2.1.0 - Wrote getting started and improved the rest
+-----------------
+
+Date  Author Description
+
+2-8-2021  Jay Shin  v1.0.0 - Initializing README
+
+2-9-2021  Jay Shin  v2.0.0 - Descript general information of program
+
+2-10-2021 Adam C  v2.1.0 - Wrote getting started and improved the rest
