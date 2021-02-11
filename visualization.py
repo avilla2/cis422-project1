@@ -52,7 +52,6 @@ def normality_test(ts):
     :return: TS(?)
     Performs a hypothesis test about normality on the
     time series data distribution
-    matplotlib qqplot
     """
     return stats.normaltest(ts)
 
