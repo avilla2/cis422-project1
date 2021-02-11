@@ -135,11 +135,17 @@ if __name__ == "__main__":
                     tree.save_load_tree("save", nm)
                 elif sl_type == 1:
                     tree.save_load_pipeline("save", nm)
+                else:
+                    print("Invalid Input")
+                    pass
             elif sl == 1:
                 if sl_type == 0:
                     tree.save_load_tree("load", nm)
                 elif sl_type == 1:
                     tree.save_load_pipeline("load", nm)
+                else:
+                    print("Invalid Input")
+                    pass
             else:
                 print("1Invalid Input")
                 pass
