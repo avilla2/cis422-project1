@@ -1,4 +1,4 @@
-preDicTable
+Welcome to preDicTable
 ------------
 README
 -------
