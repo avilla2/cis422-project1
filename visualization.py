@@ -78,10 +78,11 @@ def mape(y_test, y_forecast):
     Computes the MAPE error of two time series
     """
     y_test, y_forecast = np.array(y_test), np.array(y_forecast)
-    mape = []
-    for i in range(len(y_test)):
-        mape.append(np.mean(np.abs((y_test[i] - y_forecast[i]) / y_test[i])) * 100)
-    return mape
+    length = len(y_test)
+    sum = 0
+    for i in range(length):
+        sum += np.abs((y_test[i] - y_forecast[i]) / y_test[i])
+    return sum/length
 
 
 def smape(y_test, y_forecast):
@@ -91,9 +92,10 @@ def smape(y_test, y_forecast):
     :return: error
     Computes the SMAPE error of two time series
     """
-    smape = []
-    for i in range(len(y_test)):
-        smape.append(1/len(y_test) * np.sum(2 * np.abs(y_forecast[i] - y_test[i]) / (np.abs(y_test[i]) +
-                                                                                 np.abs(y_forecast[i])) * 100))
-    return smape
+
+    length = len(y_test)
+    sum = 0
+    for i in range(length):
+        sum += np.abs(y_forecast[i] - y_test[i]) / (np.abs(y_test[i]) + np.abs(y_forecast[i]))
+    return 100 * sum / length
 
