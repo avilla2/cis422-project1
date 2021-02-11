@@ -101,7 +101,8 @@ def clip(ts, starting_date, final_date):
     clips the time series to the specified period’s data.
     """
     temp = ts.copy()
-    return temp.iloc[starting_date:final_date, -1:]
+    temp.iloc[:, -1:] = temp.iloc[starting_date:final_date, -1:]
+    return temp
 
 
 def assign_time(ts: pd.DataFrame, start: int, increment: int) -> pd.DataFrame:
@@ -172,6 +173,24 @@ def cubic_root(ts):
     return temp
 
 
+def design_matrix2(ts: pd.DataFrame, input_index: int, output_index: int) -> pd.DataFrame:
+    new_df = {"input1": [],"input2": [],"input3": [],"input4": [],"input5": [], "output1": [], "output2": []}
+    start = input_index
+    end = output_index
+    for i in range(start, end):
+        new_df["input1"].append(float(ts.iloc[i, -1:]))
+        new_df["input2"].append(float(ts.iloc[i+1, -1:]))
+        new_df["input3"].append(float(ts.iloc[i+2, -1:]))
+        new_df["input4"].append(float(ts.iloc[i+3, -1:]))
+        new_df["input5"].append(float(ts.iloc[i+4, -1:]))
+    start = output_index
+    end = output_index + (output_index-input_index)
+    for j in range(start, end):
+        new_df["output1"].append(float(ts.iloc[j, -1:]))
+        new_df["output2"].append(float(ts.iloc[j+1, -1:]))
+    return_df = pd.DataFrame(new_df)
+    return return_df
+
 # Splits the data based on the percents (in decimal notation).
 # Percents must add to 1.0 and training and test percents cannot be 0.0.
 def split_data(df, perc_training=.4, perc_valid=.3, perc_test=.3):
@@ -195,16 +214,11 @@ def split_data(df, perc_training=.4, perc_valid=.3, perc_test=.3):
 
     return train_df, valid_df, test_df
 
-
-def design_matrix(ts, input_index, output_index):
-    pass
-
-
 """
 design matrix
-    from the parameters, this function creates an input matrix and an output matrix for the neural network to train on
-    it works by collecting the appropriate frames, transforming those frames into 2 dataframes (input and output) and
-    then transforming those dataframes into numpy arrays (matrices)
+    from the parameters, this function creates an input matrix and an output matrix for the neural network to train on.
+    Tt works by collecting the appropriate frames, transforming those frames into 2 dataframes (input and output) and
+    then transforming those dataframes into 2D Lists
     It is currently very slow.
 parameters
     ts: time series (dataframe)
@@ -258,13 +272,14 @@ def design_matrix(df, mi=4, ti=2, mo=4, to=1):
     return input_matrix, output_matrix
 
 
-def ts2dbb(input_filename, perc_training, perc_valid, perc_test, input_index,
-           output_index, output_file_name):
-    '''
-    this function combines reading a file, splitting the
-    data, converting to database, and producing the training databases.
-    '''
-    pass
+def ts2db(input_filename: str, perc_training: float, perc_valid: float, perc_test: float, input_index: int, output_index: int, output_file_name: str):
+    df = read(input_filename)
+    df_train, df_valid, df_test = split_data(df,perc_training, perc_valid, perc_test)
+    matrix_df = design_matrix2(df, input_index, output_index)
+    matrix_df.to_csv(output_file_name, index=False)
+    return df_train, df_valid, df_test
+
+# ================== OPERATION FUNCTIONS TO MAKE FORECASTS ======================
 
 
 def forecast_predict(n, model, df, mi, ti, mo, to):

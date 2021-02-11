@@ -29,8 +29,8 @@ def check_operator(node):
 	If operator needs variables, then it will ask the user
 	'''
     operators = ['denoise', 'impute_missing_data', 'impute_outliers', 'longest_continuous_run',
-				 'difference', 'scaling', 'standardize', 'logarithm', 'cubic_root', 'plot',
-				 'test_plot', 'histogram', 'box_plot', 'normality_test', 'mse', 'mape', 'smape']
+                 'difference', 'scaling', 'standardize', 'logarithm', 'cubic_root', 'plot',
+                 'test_plot', 'histogram', 'box_plot', 'normality_test', 'mse', 'mape', 'smape']
     if node.operator.lower() in operators:
         return True
     elif node.operator.lower() not in operators:
@@ -163,8 +163,6 @@ def pick_operator(node):
         data['forecast_array'] = fcast_a
         data['forecast_ts'] = fcast_df
         return data
-	# TODO get this working? It's not necessary, so might as well skip until we have everything else complete
-    #elif op == 'ts2db': return preprocessing.ts2db(data)
     elif op == 'plot':
         if 'forecast_ts' in data:
             visualization.plot([data['ts_clean'], data['forecast_ts']])
