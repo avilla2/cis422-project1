@@ -1,7 +1,7 @@
 preDicTable
-
+------------
 README
-
+-------
 Team V3 - 2-10-2021 - v2.1.0
 
 Contributors: Alex Villa, Jay Shin, Adam Christianson, Isaac Priddy, Ellie Bruhns
