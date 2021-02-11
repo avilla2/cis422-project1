@@ -64,10 +64,10 @@ def mse(y_test, y_forecast):
     :return: Error
     Computes the MSE error of two TS
     """
-    ax=None
-    mse = []
+    sum = 0
     for i in range(len(y_test)):
-        mse.append(np.square(y_test[i] - y_forecast[i]).mean(axix=ax))
+        sum += np.square(y_test[i] - y_forecast[i])
+    mse = sum/len(y_test)
     return mse
 
 def mape(y_test, y_forecast):
