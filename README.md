@@ -4,15 +4,20 @@ README
 
 Team V3 - 2-10-2021 - v2.1.0
 
+Contributors: Alex Villa, Jay Shin, Adam Christianson, Isaac Priddy, Ellie Bruhns
 
 preDicTable
 --------------
 Transformation Tree program to process and study time series
 
+Environment Requirement
+------------------------
+Python3, Pandas, SKLearn, and Anytree
+
 Overview
 -----------
-preDicTable simply asks users to pick functionalities from the transformation module. 
-Because this program is still a prototype, users must enter exact numbers or variables for each function. 
+preDicTable simply asks users to pick functionalities from the transformation module.
+Because this program is still a prototype, users must enter exact numbers or variables for each function.
 As long as users type the right inputs, this program will not fail.
 
 
@@ -36,20 +41,34 @@ If ‘0’ is selected, a tree will be initialized after the user enters the fil
 NOTE: csv file header should be 1 row in length, and contain no more rows than the data itself.
 
 -Once the user has a tree, they will be given actions that can be used by entering their respective number:
+-----------------------------------------------------------------------------------------------------------
 0: Quit - quits the program
+
 1: Add - add an operator (see below), or a subtree
+
 2: Remove Operator - removes an operator and all its children
+
 3: Replace Process - replaces a node
+
 4: Execute - executes a pipeline or a tree
+
 5: Save/Load - save or load a tree
 
+
 -Operators you can add:
+-----------------------
 split_models: splits the time series into 3 sets, and creates a neural network model.
+
 create_train: creates matrices from the training set and trains the model.
+
 test_forecast: creates a forecast with the model on the test set
+
 forecast: creates a forecast with the model at the end of the time series
+
 test_plot: plots the test_forecast and the test set
+
 plot: plots the time series and the forecast
+
 for a full list of operators, check the documentation
 
 Example
