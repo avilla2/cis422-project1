@@ -1,5 +1,7 @@
 preDicTable
+
 README
+
 Team V3 - 2-10-2021 - v2.1.0
 
 
@@ -9,14 +11,14 @@ Transformation Tree program to process and study time series
 
 Overview
 -----------
-	preDicTable simply asks users to pick functionalities from the transformation module. 
-  Because this program is still a prototype, users must enter exact numbers or variables for each function. 
-  As long as users type the right inputs, this program will not fail.
+preDicTable simply asks users to pick functionalities from the transformation module. 
+Because this program is still a prototype, users must enter exact numbers or variables for each function. 
+As long as users type the right inputs, this program will not fail.
 
 
 Rules
 --------
-	Preprocessing operators are expected to be used before modeling and visualization operators, however this is not enforced.
+Preprocessing operators are expected to be used before modeling and visualization operators, however this is not enforced.
 
 IMPORTANT : 
 The “split_models” operator should be used before the “create_train” operator which should be used before any forecast operators are used. 
@@ -52,15 +54,15 @@ for a full list of operators, check the documentation
 
 Example
 ----------
-	Preprocessing + Analyzing Example :
+Preprocessing + Analyzing Example :
 Add a Preprocessing operator to 1 node, and Add plot from analyzing operators. Executing tree results preprocessed graph.
 
-	Forecast + Analyzing Example : 
+Forecast + Analyzing Example : 
 Users may add any Preprocessing operator before Forecast. Forecast functions must be in order. Add plot to check. Executing tree results forecasted graph.
 
 Result 
 ---------
-	Users must add a visualization node to visualize the result. Because preDicTable is still a beta, its forecast may not be accurate.
+Users must add a visualization node to visualize the result. Because preDicTable is still a beta, its forecast may not be accurate.
   
 
 Revision History
