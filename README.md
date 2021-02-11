@@ -57,17 +57,17 @@ NOTE: csv file header should be 1 row in length, and contain no more rows than t
 
 -Operators you can add:
 -----------------------
-split_models: splits the time series into 3 sets, and creates a neural network model.
+split_models : splits the time series into 3 sets, and creates a neural network model.
 
-create_train: creates matrices from the training set and trains the model.
+create_train : creates matrices from the training set and trains the model.
 
-test_forecast: creates a forecast with the model on the test set
+test_forecast : creates a forecast with the model on the test set
 
-forecast: creates a forecast with the model at the end of the time series
+forecast : creates a forecast with the model at the end of the time series
 
-test_plot: plots the test_forecast and the test set
+test_plot : plots the test_forecast and the test set
 
-plot: plots the time series and the forecast
+plot : plots the time series and the forecast
 
 for a full list of operators, check the documentation
 
