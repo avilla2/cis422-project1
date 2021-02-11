@@ -54,7 +54,7 @@ def normality_test(ts):
     time series data distribution
     matplotlib qqplot
     """
-    return stats.shapiro(ts)
+    return stats.normaltest(ts)
 
 
 def mse(y_test, y_forecast):
@@ -69,6 +69,7 @@ def mse(y_test, y_forecast):
         sum += np.square(y_test[i] - y_forecast[i])
     mse = sum/len(y_test)
     return mse
+
 
 def mape(y_test, y_forecast):
     """
