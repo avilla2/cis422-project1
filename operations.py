@@ -166,7 +166,7 @@ def pick_operator(node):
 	# TODO get this working? It's not necessary, so might as well skip until we have everything else complete
     #elif op == 'ts2db': return preprocessing.ts2db(data)
     elif op == 'plot':
-        if 'forecast_test' in data:
+        if 'forecast_ts' in data:
             visualization.plot([data['ts_clean'], data['forecast_ts']])
         else:
             visualization.plot(data['ts_clean'])
