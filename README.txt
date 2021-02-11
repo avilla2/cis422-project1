@@ -21,10 +21,10 @@ Rules
 Preprocessing operators are expected to be used before modeling and visualization operators, however this is not enforced.
 
 IMPORTANT : 
-The “split_models” operator should be used before the “create_train” operator which should be used before any forecast operators are used. 
-The “test_forecast” operator should always be used before the “test_plot” operator.
+-The “split_models” operator should be used before the “create_train” operator which should be used before any forecast operators are used. 
+-The “test_forecast” operator should always be used before the “test_plot” operator.
 
-Make sure that Time Series do not contain any NaN or Infinite Values
+-Make sure that Time Series do not contain any NaN or Infinite Values
 
 Getting Started
 ------------------
