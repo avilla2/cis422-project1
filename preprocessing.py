@@ -1,5 +1,5 @@
 import pandas as pd
-from numpy import log10
+from numpy import log10, nan
 from datetime import datetime
 from sklearn.neighbors import LocalOutlierFactor
 
@@ -35,15 +35,6 @@ def denoise(ts: pd.DataFrame) -> pd.DataFrame:
     return ts
 
 
-
-def _predict_point(ts, value):
-    """
-    Predict the value of a point using linear regression
-    """
-    pass
-
-
-
 def impute_missing_data(ts):
     """
     Missing data are often encoded as blanks, NaNs, or other
@@ -64,7 +55,14 @@ def impute_outliers(ts):
     clf = LocalOutlierFactor(n_neighbors=20, contamination=0.1)
     clf.fit_predict(ts.iloc[:, -1:])
     scores = clf.negative_outlier_factor_
-    return scores
+    deletion_list = []
+    for i in range(len(scores)):
+        if scores[i] < -2:
+            deletion_list.append(i)
+    for j in deletion_list:
+        ts.iloc[j, -1:] = nan
+    ts = impute_missing_data(ts)
+    return ts
 
 
 def longest_continuous_run(ts):
@@ -80,15 +78,16 @@ def longest_continuous_run(ts):
     first = 1
     na_find = ts.iloc[:, -1:].isna()
     for i in range(ts_len):
-        if na_find.iloc[i, :].bool() == False and first == 1 and cnt > ts_max:
+        if na_find.iloc[i, :].bool() == False and first == 1 and cnt >= ts_max:
             start = i
             first = 0
-        if na_find.iloc[i, :].bool() == False and first == 0 and cnt > ts_max:
+        if na_find.iloc[i, :].bool() == False and first == 0 and cnt >= ts_max:
             cnt += 1
-        if na_find.iloc[i, :].bool() == True:
+        if na_find.iloc[i, :].bool() == True and first == 0:
             ending = i
             first = 1
-    if cnt > ts_max:
+            cnt = 0
+    if cnt >= ts_max and first == 0:
         ending = ts_len + 1
     return ts.iloc[start:ending, :]
 
