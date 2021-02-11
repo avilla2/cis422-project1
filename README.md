@@ -43,7 +43,7 @@ If ‘0’ is selected, a tree will be initialized after the user enters the fil
 NOTE: csv file header should be 1 row in length, and contain no more rows than the data itself.
 
 Main Calls:
---------------------
+------------
 Once the user has a tree, they will be given actions that can be used by entering their respective number
 
 0: Quit - quits the program
@@ -59,7 +59,7 @@ Once the user has a tree, they will be given actions that can be used by enterin
 5: Save/Load - save or load a tree
 
 
--Operators you can add:
+Operators you can add:
 -----------------------
 split_models : splits the time series into 3 sets, and creates a neural network model.
 
