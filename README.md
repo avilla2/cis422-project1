@@ -40,8 +40,10 @@ preDicTable will ask the user to enter ‘0’ to create a new tree or ‘1’ t
 If ‘0’ is selected, a tree will be initialized after the user enters the file path for the .csv file
 NOTE: csv file header should be 1 row in length, and contain no more rows than the data itself.
 
--Once the user has a tree, they will be given actions that can be used by entering their respective number:
------------------------------------------------------------------------------------------------------------
+Main Calls:
+--------------------
+Once the user has a tree, they will be given actions that can be used by entering their respective number
+
 0: Quit - quits the program
 
 1: Add - add an operator (see below), or a subtree
