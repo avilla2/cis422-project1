@@ -8,9 +8,10 @@ Easier UI module for users
 
 def print_options():
     print(
-        "\nPreprocessing List :\n[ denoise, impute_missing_data, impute_outliers, longest_continuous_run, clip, assign_time, difference, scaling, standardize, logarithm, cubic_root ]")
-    print("\nMachine Learning List :\n[ split_models, create_train, forecast|test_forecast ]")
-    print("\nAnalizing List :\n[ plot, histogram, box_plot, normality_test, mse, mape, smape ]")
+        "\nPreprocessing Operations : denoise, impute_missing_data, impute_outliers, longest_continuous_run, "
+        "\nclip, assign_time, difference, scaling, standardize, logarithm, cubic_root")
+    print("Machine Learning Operations : split_models, create_train, test_forecast, forecast")
+    print("Visualization Operations : plot, histogram, box_plot, normality_test, mse, mape, smape")
     return
 
 
@@ -135,11 +136,17 @@ if __name__ == "__main__":
                     tree.save_load_tree("save", nm)
                 elif sl_type == 1:
                     tree.save_load_pipeline("save", nm)
+                else:
+                    print("Invalid Input")
+                    pass
             elif sl == 1:
                 if sl_type == 0:
                     tree.save_load_tree("load", nm)
                 elif sl_type == 1:
                     tree.save_load_pipeline("load", nm)
+                else:
+                    print("Invalid Input")
+                    pass
             else:
                 print("1Invalid Input")
                 pass

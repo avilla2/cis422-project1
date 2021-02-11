@@ -6,7 +6,7 @@ from scipy import stats
 def plot(ts):
     """
     :param ts: Time series data
-    :return: No return(?)
+    :return: No return - plots graph
     Displays data according to their time indices
     """
     if type(ts) == list:
@@ -24,7 +24,7 @@ def plot(ts):
 def histogram(ts):
     """
     :param ts: Time series data
-    :return: No return(?)
+    :return: No return - plots graph
     Computes and Draws histogram of given TS
     Plots histogram vertically and side to side
     with a plot of the TS
@@ -37,24 +37,23 @@ def histogram(ts):
 def box_plot(ts):
     """
     :param ts: Time series data
-    :return: no return(?)
+    :return: no return - plots graph
     Produces a Box and Whiskers plot of TS
     Prints 5-number summary of the data
     """
     new_df = ts.set_index("DateTime")
     new_df.boxplot()
     plt.show()
-    return ts
+
 
 def normality_test(ts):
     """
     :param ts: Time series data
-    :return: TS(?)
+    :return: normality of data
     Performs a hypothesis test about normality on the
     time series data distribution
-    matplotlib qqplot
     """
-    return stats.shapiro(ts)
+    return stats.normaltest(ts)
 
 
 def mse(y_test, y_forecast):
@@ -70,6 +69,7 @@ def mse(y_test, y_forecast):
     mse = sum/len(y_test)
     return mse
 
+
 def mape(y_test, y_forecast):
     """
     :param y_test: Y TS data
@@ -78,10 +78,11 @@ def mape(y_test, y_forecast):
     Computes the MAPE error of two time series
     """
     y_test, y_forecast = np.array(y_test), np.array(y_forecast)
-    mape = []
-    for i in range(len(y_test)):
-        mape.append(np.mean(np.abs((y_test[i] - y_forecast[i]) / y_test[i])) * 100)
-    return mape
+    length = len(y_test)
+    sum = 0
+    for i in range(length):
+        sum += np.abs((y_test[i] - y_forecast[i]) / y_test[i])
+    return sum/length
 
 
 def smape(y_test, y_forecast):
@@ -91,9 +92,10 @@ def smape(y_test, y_forecast):
     :return: error
     Computes the SMAPE error of two time series
     """
-    smape = []
-    for i in range(len(y_test)):
-        smape.append(1/len(y_test) * np.sum(2 * np.abs(y_forecast[i] - y_test[i]) / (np.abs(y_test[i]) +
-                                                                                 np.abs(y_forecast[i])) * 100))
-    return smape
+
+    length = len(y_test)
+    sum = 0
+    for i in range(length):
+        sum += np.abs(y_forecast[i] - y_test[i]) / (np.abs(y_test[i]) + np.abs(y_forecast[i]))
+    return 100 * sum / length
 

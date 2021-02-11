@@ -126,13 +126,13 @@ def pick_operator(node):
     elif op == 'split_models':
         node.prc_data = data['ts_clean']
         train_df, valid_df, test_df = preprocessing.split_data(data['ts_clean'], node.tvt[0], node.tvt[1], node.tvt[2])
-        node.model = modeling.mlp_model(node.ly)
+        data['model'] = modeling.mlp_model(node.ly)
         data['train_ts'] = train_df
         data['valid_ts'] = valid_df
         data['test_ts'] = test_df
         return data
     elif op == 'create_train':
-        model = node.parent.model
+        model = data['model']
         train_df = data['train_ts']
         train_x, train_y = preprocessing.design_matrix(train_df, node.mt[0], node.mt[1], node.mt[2], node.mt[3])
         model.fit(train_x, train_y)
@@ -151,7 +151,7 @@ def pick_operator(node):
         mts = mts.mt
         test_a, fcast_a, fcast_df = preprocessing.forecast_test(node.n, model, df, mts[0], mts[1], mts[2], mts[3])
         data['test_array'] = test_a
-        data['forecast_array'] = fcast_a
+        data['test_forecast'] = fcast_a
         data['forecast_test'] = fcast_df
         return data
     elif op == 'forecast':
@@ -176,14 +176,20 @@ def pick_operator(node):
             print("Must use 'forecast_test' before using 'test_plot'")
         return data
     elif op == 'histogram':
-        return visualization.histogram(data['ts'])
+        visualization.histogram(data['ts'])
+        return data
     elif op == 'box_plot':
-        return visualization.box_plot(data['ts'])
+        visualization.box_plot(data['ts'])
+        return data
     elif op == 'normality_test':
-        return visualization.normality_test(data['ts'])
+        visualization.normality_test(data['ts'])
+        return data
     elif op == 'mse':
-        return visualization.mse(data['test_array'], data['forecast_array'])
+        print("MSE:", visualization.mse(data['test_array'], data['test_forecast']))
+        return data
     elif op == 'mape':
-        return visualization.mape(data['test_array'], data['forecast_array'])
+        print("MAPE:", visualization.mape(data['test_array'], data['test_forecast']))
+        return data
     elif op == 'smape':
-        return visualization.smape(data['test_array'], data['forecast_array'])
+        print("SMAPE:", visualization.smape(data['test_array'], data['test_forecast']))
+        return data
